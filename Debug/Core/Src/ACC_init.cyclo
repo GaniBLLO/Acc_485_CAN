@@ -1,0 +1,7 @@
+ACC_init.c:27:6:update_ACC_data	3
+ACC_init.c:41:6:ACC_init	1
+ACC_init.c:50:6:ACC_init_addr	2
+ACC_init.c:74:6:ACC_setting	1
+ACC_init.c:88:6:read_x_axis	3
+ACC_init.c:105:6:read_y_axis	3
+ACC_init.c:123:6:read_z_axis	6

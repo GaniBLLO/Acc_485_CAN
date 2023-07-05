@@ -140,12 +140,16 @@ void MCP2515_ReadRxSequence(uint8_t instruction, uint8_t *data, uint8_t length)
 void MCP2515_WriteByte(uint8_t address, uint8_t data)
 {
   MCP2515_CS_LOW();
+  HAL_Delay(20);
+//  SPI_Tx(MCP2515_WRITE);
+//  SPI_Tx(0xC);
+//  SPI_Tx(0xf0);
 
-  SPI_Tx(MCP2515_WRITE);
-  SPI_Tx(address);
-  SPI_Tx(data);
+  SPI_Tx(0x8F);
+  SPI_Tx(0x0F);
 
   MCP2515_CS_HIGH();
+
 }
 
 /* Sequential Bytes 쓰기 */

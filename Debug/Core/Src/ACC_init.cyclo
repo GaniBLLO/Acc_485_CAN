@@ -1,4 +1,4 @@
-ACC_init.c:27:6:update_ACC_data	3
+ACC_init.c:27:6:update_ACC_data	2
 ACC_init.c:41:6:ACC_init	1
 ACC_init.c:50:6:ACC_init_addr	2
 ACC_init.c:74:6:ACC_setting	1

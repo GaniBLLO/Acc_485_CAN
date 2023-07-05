@@ -31,7 +31,7 @@ void update_ACC_data(I2C_HandleTypeDef *i2c){
 	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_STATUS_REG, 1, &command[0], 1, 1000);		//Обнвляем статус регистров
 	ACC_set.STATUS_REG.all = command[0];
 
-	if(rs.RS_DataSended && ACC_set.STATUS_REG.bit.ZYXDA){
+	if(rs.RS_DataSended){
 		read_x_axis(i2c);
 		read_y_axis(i2c);
 		read_z_axis(i2c);
@@ -108,10 +108,10 @@ void read_y_axis(I2C_HandleTypeDef *i2c){
 
     if(ACC_set.STATUS_REG.bit.YOR || ACC_set.STATUS_REG.bit.YDA){
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_HI, 1, &data_HI_RX[0], 1, 10);
+		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_HI, 1, &data_HI_RX[0], 1, 1000);
 		OUT.Y.bit.HI = data_HI_RX[0] & 0xff;
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_LO, 1, &data_LO_RX[0], 1, 10);
+		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_LO, 1, &data_LO_RX[0], 1, 1000);
 		OUT.Y.bit.LO = data_LO_RX[0] & 0xff;
 
 	    rs.RS_Y_axis_data = 1;
@@ -125,10 +125,10 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
     uint8_t data_LO_RX[1], data_HI_RX[1];
     if(ACC_set.STATUS_REG.bit.ZOR || ACC_set.STATUS_REG.bit.ZDA){
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_HI, 1, &data_HI_RX[0], 1, 10);
+		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_HI, 1, &data_HI_RX[0], 1, 1000);
 		OUT.Z.bit.HI = data_HI_RX[0] & 0xff;
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_LO, 1, &data_LO_RX[0], 1, 10);
+		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_LO, 1, &data_LO_RX[0], 1, 1000);
 		OUT.Z.bit.LO = data_LO_RX[0] & 0xff;
 
 		rs.RS_Z_axis_data = 1;

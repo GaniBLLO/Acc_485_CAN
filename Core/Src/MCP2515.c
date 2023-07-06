@@ -9,12 +9,12 @@
 #include "MCP2515.h"
 #include "main.h"
 /* Pin 설정에 맞게 수정필요. Modify below items for your SPI configurations */
-extern SPI_HandleTypeDef        hspi2;
-#define SPI_CAN                 &hspi2
+extern SPI_HandleTypeDef        hspi1;
+#define SPI_CAN                 &hspi1
 #define SPI_TIMEOUT             10
 
-#define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET)
-#define MCP2515_CS_LOW()    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET)
+#define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
+#define MCP2515_CS_LOW()    HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET)
 
 /* Prototypes */
 static void SPI_Tx(uint8_t data);
@@ -45,7 +45,7 @@ bool MCP2515_Initialize(void)
 
 bool MCP2515_SetConfigMode(void)
 {
-  /* CANCTRL Register Configuration 모드 설정 */
+  /* CANCTRL Register Configuration */
   MCP2515_WriteByte(MCP2515_CANCTRL, 0x80);
 
   uint8_t loop = 10;
@@ -140,11 +140,9 @@ void MCP2515_ReadRxSequence(uint8_t instruction, uint8_t *data, uint8_t length)
 void MCP2515_WriteByte(uint8_t address, uint8_t data)
 {
   MCP2515_CS_LOW();
-
   SPI_Tx(MCP2515_WRITE);
   SPI_Tx(address);
   SPI_Tx(data);
-
   MCP2515_CS_HIGH();
 }
 

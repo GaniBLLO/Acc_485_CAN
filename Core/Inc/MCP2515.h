@@ -8,7 +8,7 @@
 #ifndef INC_MCP2515_H_
 #define INC_MCP2515_H_
 
-#pragma anon_unions
+//#pragma anon_unions
 #include "stm32f1xx_hal.h"
 #include "stdbool.h"
 /* MCP2515 SPI Instruction Set */
@@ -64,8 +64,8 @@
 #define MCP2515_RXF5SIDL	0x19
 #define MCP2515_RXF5EID8	0x1A
 #define MCP2515_RXF5EID0	0x1B
-#define MCP2515_TEC			0x1C
-#define MCP2515_REC			0x1D
+#define MCP2515_TEC		0x1C
+#define MCP2515_REC		0x1D
 
 #define MCP2515_RXM0SIDH	0x20
 #define MCP2515_RXM0SIDL	0x21

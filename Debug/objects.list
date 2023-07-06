@@ -1,4 +1,5 @@
 "./Core/Src/ACC_init.o"
+"./Core/Src/CAN_MCP2515.o"
 "./Core/Src/MCP2515.o"
 "./Core/Src/RS_485.o"
 "./Core/Src/main.o"

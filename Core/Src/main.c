@@ -26,7 +26,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+CAN_TxHeaderTypeDef TxHeader;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -52,8 +52,7 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-CAN_TxHeaderTypeDef TxHeader;
-CAN_RxHeaderTypeDef RxHeader;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,9 +89,9 @@ void GPIO_init(){
 
 void set_TX_Header(CAN_TxHeaderTypeDef *TX){
 
-    TX->StdId 	= 0x18<<1;
+    TX->StdId 	= 0x30;
     TX->ExtId 	= 0;
-    TX->IDE	= CAN_ID_STD;
+    TX->IDE		= CAN_ID_STD;
     TX->RTR 	= CAN_RTR_DATA;
     TX->DLC 	= 8;
     TX->TransmitGlobalTime = 0;
@@ -107,7 +106,7 @@ void set_TX_Header(CAN_TxHeaderTypeDef *TX){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-    uint32_t RX_msg = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -138,23 +137,13 @@ int main(void)
 //  GPIO_init();
 //  ACC_init(&hi2c1);
 
-  set_TX_Header(&TxHeader);
-  HAL_CAN_Start(&hcan);
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-  while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0){;}
 
-	 if(HAL_CAN_AddTxMessage(&hcan, &TxHeader,(uint8_t*)"Hello World! I'm in CAN", &RX_msg) != HAL_OK)
-	 {
-		 HAL_UART_Transmit(&huart1, (uint8_t*)"ER SEND\n", 8, 100);
-	 }
-	 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	 HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -248,6 +237,19 @@ static void MX_CAN_Init(void)
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){
       Error_Handler();
   }
+
+  if(HAL_CAN_Start(&hcan) != HAL_OK){
+	  Error_Handler();
+  }
+
+  if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK){
+	  Error_Handler();
+  }
+  if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_ERROR) != HAL_OK){
+	  Error_Handler();
+  }
+
+  set_TX_Header(&TxHeader);
   /* USER CODE END CAN_Init 2 */
 
 }
@@ -296,7 +298,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.OwnAddress1 = 36;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;

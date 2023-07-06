@@ -1,0 +1,2 @@
+../Core/Src/CAN_MCP2515.c:14:6:init_MCP2515	16	static
+../Core/Src/CAN_MCP2515.c:27:6:init_peripherial	8	static

@@ -9,8 +9,8 @@
 #include "MCP2515.h"
 #include "main.h"
 /* Pin 설정에 맞게 수정필요. Modify below items for your SPI configurations */
-extern SPI_HandleTypeDef        hspi1;
-#define SPI_CAN                 &hspi1
+extern SPI_HandleTypeDef        hspi2;
+#define SPI_CAN                 &hspi2
 #define SPI_TIMEOUT             10
 
 #define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
@@ -22,6 +22,7 @@ static void SPI_TxBuffer(uint8_t *buffer, uint8_t length);
 static uint8_t SPI_Rx(void);
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length);
 
+SPI_CONFIG_REG	CNF;
 
 /* MCP2515 초기화 */
 bool MCP2515_Initialize(void)
@@ -62,6 +63,8 @@ bool MCP2515_SetConfigMode(void)
 }
 
 /* MCP2515 를 Normal모드로 전환 */
+
+
 bool MCP2515_SetNormalMode(void)
 {
   /* CANCTRL Register Normal 모드 설정 */
@@ -259,4 +262,25 @@ static uint8_t SPI_Rx(void)
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 {
   HAL_SPI_Receive(SPI_CAN, buffer, length, SPI_TIMEOUT);
+}
+
+
+void setting_CNFx(){
+
+    MCP2515_WriteByte(MCP2515_CNF1, 0x1);
+    MCP2515_WriteByte(MCP2515_CNF2, );
+    MCP2515_WriteByte(MCP2515_CNF3, );
+
+
+}
+
+void MCP_settings(){
+
+    HAL_SPI_StateTypeDef	result;
+
+    result = HAL_SPI_GetState(&hspi2);
+     if(result == HAL_SPI_STATE_READY)
+         while(MCP2515_SetConfigMode() != true);
+
+    setting_CNFx();
 }

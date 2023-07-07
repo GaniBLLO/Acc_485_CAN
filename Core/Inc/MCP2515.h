@@ -216,6 +216,70 @@ typedef struct{
   uint8_t tempEID0;
 }id_reg_t;
 
+
+
+
+ /*****************************New structs*****************************/
+typedef union{
+    uint8_t	all;
+    struct{
+	uint8_t	CLKPRE0	:1;
+	uint8_t	CLKPRE1	:1;
+	uint8_t	CLKEN	:1;
+	uint8_t	OSM	:1;
+	uint8_t	ABAT	:1;
+	uint8_t	REQOP0	:1;
+	uint8_t	REQOP1	:1;
+	uint8_t	REQOP2	:1;
+    }bit;
+}SPI_CONTROL_REG;
+
+typedef union{
+    uint8_t	all;
+    struct{
+	uint8_t	BRP0	:1;
+	uint8_t	BRP1	:1;
+	uint8_t	BRP2	:1;
+	uint8_t	BRP3	:1;
+	uint8_t	BRP4	:1;
+	uint8_t	BRP5	:1;
+	uint8_t	SJW0	:1;
+	uint8_t	SJW1	:1;
+    }bit;
+}CNF_1;
+
+typedef union{
+    uint8_t	all;
+    struct{
+	uint8_t	PRESEG0	:1;
+	uint8_t	PRESEG1	:1;
+	uint8_t	PRESEG2	:1;
+	uint8_t	PHSEG1	:3;
+	uint8_t	SAM	:1;
+	uint8_t	BTLMODE	:1;
+    }bit;
+}CNF_2;
+
+
+typedef union{
+    uint8_t	all;
+    struct{
+	uint8_t	PRESEG2	:3;
+	uint8_t	reserv	:3;
+	uint8_t	WAKFIL	:1;
+	uint8_t	SOF	:1;
+    }bit;
+}CNF_3;
+
+
+typedef struct{
+    SPI_CONTROL_REG	SPICTRL;
+    CNF_1		CNF1;
+    CNF_2		CNF2;
+    CNF_3		CNF3;
+}SPI_CONFIG_REG;
+
+
 /* Functions */
 bool MCP2515_Initialize(void);
 bool MCP2515_SetConfigMode(void);
@@ -232,5 +296,6 @@ void MCP2515_RequestToSend(uint8_t instruction);
 uint8_t MCP2515_ReadStatus(void);
 uint8_t MCP2515_GetRxStatus(void);
 void MCP2515_BitModify(uint8_t address, uint8_t mask, uint8_t data);
-
+void MCP_settings();
+void setting_CNFx();
 #endif /* INC_MCP2515_H_ */

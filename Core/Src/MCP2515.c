@@ -283,7 +283,22 @@ void setting_CNFx(){
     MCP2515_WriteByte(MCP2515_CNF2, 0xFF);
     MCP2515_WriteByte(MCP2515_CNF3, 0x82);
 
-
+    RXF0 RXF0reg;
+    RXF1 RXF1reg;
+    RXF2 RXF2reg;
+    RXF3 RXF3reg;
+    RXF4 RXF4reg;
+    RXF5 RXF5reg;
+    RXM0 RXM0reg;
+    RXM1 RXM1reg;
+    MCP2515_WriteByteSequence(MCP2515_RXM0SIDH, MCP2515_RXM0EID0, &(RXM0reg.RXM0SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXM1SIDH, MCP2515_RXM1EID0, &(RXM1reg.RXM1SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF0SIDH, MCP2515_RXF0EID0, &(RXF0reg.RXF0SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF1SIDH, MCP2515_RXF1EID0, &(RXF1reg.RXF1SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF2SIDH, MCP2515_RXF2EID0, &(RXF2reg.RXF2SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF3SIDH, MCP2515_RXF3EID0, &(RXF3reg.RXF3SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF4SIDH, MCP2515_RXF4EID0, &(RXF4reg.RXF4SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF5SIDH, MCP2515_RXF5EID0, &(RXF5reg.RXF5SIDH));
 /*Setting normal mode*/
     while(MCP2515_SetNormalMode() != true);
 }
@@ -306,7 +321,7 @@ void MCP_settings(){
 
 
 void CAN_Send(){
-    uint8_t	res, axis_data[9];
+    uint8_t	res, axis_data[9], status;
     TX_CTRL	TXB;
 
     axis_data[0] = OUT.X.bit.LO;
@@ -315,18 +330,20 @@ void CAN_Send(){
     axis_data[3] = OUT.Y.bit.HI;
     axis_data[4] = OUT.Z.bit.LO;
     axis_data[5] = OUT.Z.bit.HI;
+    status = MCP2515_ReadStatus();
 
-    res = (MCP2515_ReadStatus()) & 0x4;
-    if(res == 0x8){
-	//TXB.TXB0CTRL.bit.TXREQ = 0; Должен обнулиться сам
-	TXB.TXB0CTRL.bit.ABTF = 0;
-	TXB.TXB0CTRL.bit.MLOA = 0;
-	TXB.TXB0CTRL.bit.TXERR = 0;
-
+//    if( == 0x8){
+//	//TXB.TXB0CTRL.bit.TXREQ = 0; Должен обнулиться сам
+//	TXB.TXB0CTRL.bit.ABTF = 0;
+//	TXB.TXB0CTRL.bit.MLOA = 0;
+//	TXB.TXB0CTRL.bit.TXERR = 0;
+//    }
 	res = HAL_SPI_GetState(&hspi1);
 	if(res == HAL_SPI_STATE_READY){
+	    MCP2515_CS_LOW();
 	    HAL_SPI_Transmit(&hspi1, axis_data, 6, 1000);
+	    MCP2515_CS_HIGH();
+
 	}
-    }
 
 }

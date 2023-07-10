@@ -5,8 +5,8 @@
  *      Author: Sokolov EvgenII
  */
 
+#include <RS_Functions.h>
 #include "ACC_init.h"
-#include "RS_485.h"
 
 #define ACC_ADDR	0x18 << 1
 #define COMMAND_CTRL_REG1	0x20
@@ -91,14 +91,15 @@ void read_x_axis(I2C_HandleTypeDef *i2c){
 
     if(ACC_set.STATUS_REG.bit.XOR || ACC_set.STATUS_REG.bit.XDA){
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_HI, 1, &data_HI_RX[0], 1, 10);		//Считали данные с регистра и записали в структуру
-		OUT.X.bit.HI = data_HI_RX[0] & 0xff;
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_HI, 1, &data_HI_RX[0], 1, 10);		//Считали данные с регистра и записали в структуру
+	OUT.X.bit.HI = data_HI_RX[0] & 0xff;
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.X.bit.LO = data_LO_RX[0] & 0xff;
 
-		rs.RS_X_axis_data = 1;															//Данные готовы к отправке
-	}
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_LO, 1, &data_LO_RX[0], 1, 10);
+	OUT.X.bit.LO = data_LO_RX[0] & 0xff;
+
+	rs.RS_X_axis_data = 1;									//Данные готовы к отправке
+    }
 }
 
 
@@ -108,13 +109,13 @@ void read_y_axis(I2C_HandleTypeDef *i2c){
 
     if(ACC_set.STATUS_REG.bit.YOR || ACC_set.STATUS_REG.bit.YDA){
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_HI, 1, &data_HI_RX[0], 1, 10);
-		OUT.Y.bit.HI = data_HI_RX[0] & 0xff;
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_HI, 1, &data_HI_RX[0], 1, 10);
+	OUT.Y.bit.HI = data_HI_RX[0] & 0xff;
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.Y.bit.LO = data_LO_RX[0] & 0xff;
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_LO, 1, &data_LO_RX[0], 1, 10);
+	OUT.Y.bit.LO = data_LO_RX[0] & 0xff;
 
-	    rs.RS_Y_axis_data = 1;
+	rs.RS_Y_axis_data = 1;
     }
 
 }
@@ -125,17 +126,17 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
     uint8_t data_LO_RX[1], data_HI_RX[1];
     if(ACC_set.STATUS_REG.bit.ZOR || ACC_set.STATUS_REG.bit.ZDA){
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_HI, 1, &data_HI_RX[0], 1, 10);
-		OUT.Z.bit.HI = data_HI_RX[0] & 0xff;
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_HI, 1, &data_HI_RX[0], 1, 10);
+	OUT.Z.bit.HI = data_HI_RX[0] & 0xff;
 
-		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.Z.bit.LO = data_LO_RX[0] & 0xff;
+	HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_LO, 1, &data_LO_RX[0], 1, 10);
+	OUT.Z.bit.LO = data_LO_RX[0] & 0xff;
 
-		rs.RS_Z_axis_data = 1;
+	rs.RS_Z_axis_data = 1;
     }
 
-    if(rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data)
+    if(rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data){
     	rs.RS_DataReady = 1;
-
+    }
 }
 

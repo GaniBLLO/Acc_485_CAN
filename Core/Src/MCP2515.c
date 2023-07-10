@@ -8,9 +8,11 @@
 
 #include "MCP2515.h"
 #include "main.h"
+#include "ACC_init.h"
+
 /* Pin 설정에 맞게 수정필요. Modify below items for your SPI configurations */
-extern SPI_HandleTypeDef        hspi2;
-#define SPI_CAN                 &hspi2
+extern SPI_HandleTypeDef        hspi1;
+#define SPI_CAN                 &hspi1
 #define SPI_TIMEOUT             10
 
 #define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
@@ -21,8 +23,8 @@ static void SPI_Tx(uint8_t data);
 static void SPI_TxBuffer(uint8_t *buffer, uint8_t length);
 static uint8_t SPI_Rx(void);
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length);
-
-SPI_CONFIG_REG	CNF;
+extern OUT_DATA	OUT;
+extern SPI_CONFIG_REG	CANCTRL;
 
 /* MCP2515 초기화 */
 bool MCP2515_Initialize(void)
@@ -267,20 +269,64 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 
 void setting_CNFx(){
 
+/*https://github.com/eziya/STM32_SPI_MCP2515/blob/master/Src/CANSPI.c#L202*/
+/*http://microsin.net/adminstuff/hardware/mcp2515-stand-alone-can-controller-with-spi-interface.html*/
+
+ /*
+ * * Tq = 2(x+1)/Fosc = (1.11us + 36MHz)/2 - 1 = 0.998 => 1
+ * Tbit = SyncSeg + PropSeg + PhSeg1+ PhSeg2 = 16(18)
+ * Tbit = 1tq + (7tq + 7tq) + 2tq = 17 => 88.235%
+ * BRP = 1
+ * SJW = 00 => 1*Tq */
+
     MCP2515_WriteByte(MCP2515_CNF1, 0x1);
-    MCP2515_WriteByte(MCP2515_CNF2, );
-    MCP2515_WriteByte(MCP2515_CNF3, );
+    MCP2515_WriteByte(MCP2515_CNF2, 0xFF);
+    MCP2515_WriteByte(MCP2515_CNF3, 0x82);
 
 
+/*Setting normal mode*/
+    while(MCP2515_SetNormalMode() != true);
 }
 
 void MCP_settings(){
 
     HAL_SPI_StateTypeDef	result;
 
-    result = HAL_SPI_GetState(&hspi2);
+    result = HAL_SPI_GetState(&hspi1);
      if(result == HAL_SPI_STATE_READY)
          while(MCP2515_SetConfigMode() != true);
 
     setting_CNFx();
+    GPIOC->BSRR |= GPIO_BSRR_BS13;
+    HAL_Delay(1000);
+    GPIOC->BSRR |= GPIO_BSRR_BR13;
+    HAL_Delay(1000);
+    GPIOC->BSRR |= GPIO_BSRR_BS13;
+}
+
+
+void CAN_Send(){
+    uint8_t	res, axis_data[9];
+    TX_CTRL	TXB;
+
+    axis_data[0] = OUT.X.bit.LO;
+    axis_data[1] = OUT.X.bit.HI;
+    axis_data[2] = OUT.Y.bit.LO;
+    axis_data[3] = OUT.Y.bit.HI;
+    axis_data[4] = OUT.Z.bit.LO;
+    axis_data[5] = OUT.Z.bit.HI;
+
+    res = (MCP2515_ReadStatus()) & 0x4;
+    if(res == 0x8){
+	//TXB.TXB0CTRL.bit.TXREQ = 0; Должен обнулиться сам
+	TXB.TXB0CTRL.bit.ABTF = 0;
+	TXB.TXB0CTRL.bit.MLOA = 0;
+	TXB.TXB0CTRL.bit.TXERR = 0;
+
+	res = HAL_SPI_GetState(&hspi1);
+	if(res == HAL_SPI_STATE_READY){
+	    HAL_SPI_Transmit(&hspi1, axis_data, 6, 1000);
+	}
+    }
+
 }

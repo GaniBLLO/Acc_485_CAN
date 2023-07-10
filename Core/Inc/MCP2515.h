@@ -279,6 +279,26 @@ typedef struct{
     CNF_3		CNF3;
 }SPI_CONFIG_REG;
 
+typedef union{
+    uint8_t	all;
+    struct{
+	uint8_t	rsv	:1;
+	uint8_t	ABTF	:1;
+	uint8_t	MLOA	:1;
+	uint8_t	TXERR	:1;
+	uint8_t	TXREQ	:1;
+	uint8_t	reserv	:1;
+	uint8_t	TXP	:2;
+    }bit;
+}TXB_CTRL;
+
+
+typedef	struct{
+    TXB_CTRL	TXB0CTRL;
+    TXB_CTRL	TXB1CTRL;
+    TXB_CTRL	TXB2CTRL;
+}TX_CTRL;
+
 
 /* Functions */
 bool MCP2515_Initialize(void);

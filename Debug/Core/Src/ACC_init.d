@@ -1,4 +1,4 @@
-Core/Src/ACC_init.o: ../Core/Src/ACC_init.c ../Core/Inc/ACC_init.h \
+Core/Src/ACC_init.o: ../Core/Src/ACC_init.c ../Core/Inc/RS_Functions.h \
  ../Core/Inc/main.h ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -26,8 +26,8 @@ Core/Src/ACC_init.o: ../Core/Src/ACC_init.c ../Core/Inc/ACC_init.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/RS_485.h
-../Core/Inc/ACC_init.h:
+ ../Core/Inc/ACC_init.h
+../Core/Inc/RS_Functions.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -56,4 +56,4 @@ Core/Src/ACC_init.o: ../Core/Src/ACC_init.c ../Core/Inc/ACC_init.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
-../Core/Inc/RS_485.h:
+../Core/Inc/ACC_init.h:

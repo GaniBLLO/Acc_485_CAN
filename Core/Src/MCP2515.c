@@ -8,9 +8,15 @@
 
 #include "MCP2515.h"
 #include "main.h"
+#include "ACC_init.h"
+#include "string.h"
+#include "stdio.h"
+
 /* Pin 설정에 맞게 수정필요. Modify below items for your SPI configurations */
-extern SPI_HandleTypeDef        hspi2;
-#define SPI_CAN                 &hspi2
+extern 	SPI_HandleTypeDef       hspi1;
+extern	CAN_RxHeaderTypeDef		RxHeader;
+extern 	UART_HandleTypeDef 		huart1;
+#define SPI_CAN                 &hspi1
 #define SPI_TIMEOUT             10
 
 #define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
@@ -21,8 +27,8 @@ static void SPI_Tx(uint8_t data);
 static void SPI_TxBuffer(uint8_t *buffer, uint8_t length);
 static uint8_t SPI_Rx(void);
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length);
-
-SPI_CONFIG_REG	CNF;
+extern OUT_DATA	OUT;
+extern SPI_CONFIG_REG	CANCTRL;
 
 /* MCP2515 초기화 */
 bool MCP2515_Initialize(void)
@@ -267,23 +273,143 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 
 void setting_CNFx(){
 
-/*************https://github.com/electricimp/MCP2515#operation-mode-constants - Timing*************/
-/*http://microsin.net/adminstuff/hardware/mcp2515-stand-alone-can-controller-with-spi-interface.html - рус. даташит*/
+/*https://github.com/eziya/STM32_SPI_MCP2515/blob/master/Src/CANSPI.c#L202*/
+/*http://microsin.net/adminstuff/hardware/mcp2515-stand-alone-can-controller-with-spi-interface.html*/
 
-    MCP2515_WriteByte(MCP2515_CNF1, 0x2);
-    MCP2515_WriteByte(MCP2515_CNF2, );
-    MCP2515_WriteByte(MCP2515_CNF3, );
+ /*
+ * * Tq = 2(x+1)/Fosc = (1.11us + 36MHz)/2 - 1 = 0.998 => 1
+ * Tbit = SyncSeg + PropSeg + PhSeg1+ PhSeg2 = 16(18)
+ * Tbit = 1tq + (7tq + 7tq) + 2tq = 17 => 88.235%
+ * BRP = 1
+ * SJW = 00 => 1*Tq */
+
+    MCP2515_WriteByte(MCP2515_CNF1, 0x1);
+    MCP2515_WriteByte(MCP2515_CNF2, 0xFF);
+    MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+
+    RXF0 RXF0reg;
+    RXF1 RXF1reg;
+    RXF2 RXF2reg;
+    RXF3 RXF3reg;
+    RXF4 RXF4reg;
+    RXF5 RXF5reg;
+    RXM0 RXM0reg;
+    RXM1 RXM1reg;
+
+    /* Intialize Rx Mask values */
+	RXM0reg.RXM0SIDH = 0x00;
+	RXM0reg.RXM0SIDL = 0x00;
+	RXM0reg.RXM0EID8 = 0x00;
+	RXM0reg.RXM0EID0 = 0x00;
+
+	RXM1reg.RXM1SIDH = 0x00;
+	RXM1reg.RXM1SIDL = 0x00;
+	RXM1reg.RXM1EID8 = 0x00;
+	RXM1reg.RXM1EID0 = 0x00;
+
+	/* Intialize Rx Filter values */
+	RXF0reg.RXF0SIDH = 0x00;
+	RXF0reg.RXF0SIDL = 0x00;      //Starndard Filter
+	RXF0reg.RXF0EID8 = 0x00;
+	RXF0reg.RXF0EID0 = 0x00;
+
+	RXF1reg.RXF1SIDH = 0x00;
+	RXF1reg.RXF1SIDL = 0x08;      //Exntended Filter
+	RXF1reg.RXF1EID8 = 0x00;
+	RXF1reg.RXF1EID0 = 0x00;
+
+	RXF2reg.RXF2SIDH = 0x00;
+	RXF2reg.RXF2SIDL = 0x00;
+	RXF2reg.RXF2EID8 = 0x00;
+	RXF2reg.RXF2EID0 = 0x00;
+
+	RXF3reg.RXF3SIDH = 0x00;
+	RXF3reg.RXF3SIDL = 0x00;
+	RXF3reg.RXF3EID8 = 0x00;
+	RXF3reg.RXF3EID0 = 0x00;
+
+	RXF4reg.RXF4SIDH = 0x00;
+	RXF4reg.RXF4SIDL = 0x00;
+	RXF4reg.RXF4EID8 = 0x00;
+	RXF4reg.RXF4EID0 = 0x00;
+
+	RXF5reg.RXF5SIDH = 0x00;
+	RXF5reg.RXF5SIDL = 0x08;
+	RXF5reg.RXF5EID8 = 0x00;
+	RXF5reg.RXF5EID0 = 0x00;
+
+    MCP2515_WriteByteSequence(MCP2515_RXM0SIDH, MCP2515_RXM0EID0, &(RXM0reg.RXM0SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXM1SIDH, MCP2515_RXM1EID0, &(RXM1reg.RXM1SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF0SIDH, MCP2515_RXF0EID0, &(RXF0reg.RXF0SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF1SIDH, MCP2515_RXF1EID0, &(RXF1reg.RXF1SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF2SIDH, MCP2515_RXF2EID0, &(RXF2reg.RXF2SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF3SIDH, MCP2515_RXF3EID0, &(RXF3reg.RXF3SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF4SIDH, MCP2515_RXF4EID0, &(RXF4reg.RXF4SIDH));
+    MCP2515_WriteByteSequence(MCP2515_RXF5SIDH, MCP2515_RXF5EID0, &(RXF5reg.RXF5SIDH));
 
 
+/*Setting normal mode*/
+    while(MCP2515_SetNormalMode() != true);
 }
 
 void MCP_settings(){
 
     HAL_SPI_StateTypeDef	result;
 
-    result = HAL_SPI_GetState(&hspi2);
+    result = HAL_SPI_GetState(&hspi1);
      if(result == HAL_SPI_STATE_READY)
          while(MCP2515_SetConfigMode() != true);
 
     setting_CNFx();
+    GPIOC->BSRR |= GPIO_BSRR_BS13;
+    HAL_Delay(1000);
+    GPIOC->BSRR |= GPIO_BSRR_BR13;
+    HAL_Delay(1000);
+    GPIOC->BSRR |= GPIO_BSRR_BS13;
+}
+
+
+void SPI_Send(){
+    uint8_t	res, axis_data[9], status;
+
+    axis_data[0] = OUT.X.bit.LO;
+    axis_data[1] = OUT.X.bit.HI;
+    axis_data[2] = OUT.Y.bit.LO;
+    axis_data[3] = OUT.Y.bit.HI;
+    axis_data[4] = OUT.Z.bit.LO;
+    axis_data[5] = OUT.Z.bit.HI;
+
+    status = MCP2515_ReadStatus();
+
+//    if( == 0x8){
+//	//TXB.TXB0CTRL.bit.TXREQ = 0; Должен обнулиться сам
+//	TXB.TXB0CTRL.bit.ABTF = 0;
+//	TXB.TXB0CTRL.bit.MLOA = 0;
+//	TXB.TXB0CTRL.bit.TXERR = 0;
+//    }
+	res = HAL_SPI_GetState(&hspi1);
+	if(res == HAL_SPI_STATE_READY){
+	    MCP2515_CS_LOW();
+	    HAL_SPI_Transmit(&hspi1, axis_data, 6, 1000);
+	    MCP2515_CS_HIGH();
+	}
+
+}
+void CAN_Recieve(CAN_HandleTypeDef *hcan){
+	uint8_t		RX_mailbox[6];
+	int16_t		axis_x_data[1], axis_y_data[1], axis_z_data[1];
+	char 		buffer[50];
+	HAL_StatusTypeDef	RX_msg;
+
+
+	RX_msg = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RX_mailbox);
+
+	if( RX_msg == HAL_OK){
+		axis_x_data[0] = RX_mailbox[0] | RX_mailbox[1];
+		axis_y_data[0] = RX_mailbox[2] | RX_mailbox[3];
+		axis_z_data[0] = RX_mailbox[4] | RX_mailbox[5];
+
+		sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", axis_x_data[0], axis_y_data[0], axis_z_data[0]);
+		HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);
+	}
 }

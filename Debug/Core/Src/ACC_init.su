@@ -3,5 +3,5 @@
 ../Core/Src/ACC_init.c:50:6:ACC_init_addr	32	static
 ../Core/Src/ACC_init.c:74:6:ACC_setting	40	static
 ../Core/Src/ACC_init.c:88:6:read_x_axis	40	static
-../Core/Src/ACC_init.c:105:6:read_y_axis	40	static
-../Core/Src/ACC_init.c:123:6:read_z_axis	40	static
+../Core/Src/ACC_init.c:106:6:read_y_axis	40	static
+../Core/Src/ACC_init.c:124:6:read_z_axis	40	static

@@ -1,5 +1,6 @@
-Core/Src/RS_485.o: ../Core/Src/RS_485.c ../Core/Inc/RS_485.h \
- ../Core/Inc/main.h ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
+Core/Src/RS_Functions.o: ../Core/Src/RS_Functions.c \
+ ../Core/Inc/RS_Functions.h ../Core/Inc/main.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h \
@@ -27,7 +28,7 @@ Core/Src/RS_485.o: ../Core/Src/RS_485.c ../Core/Inc/RS_485.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/ACC_init.h
-../Core/Inc/RS_485.h:
+../Core/Inc/RS_Functions.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:

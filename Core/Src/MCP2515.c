@@ -267,7 +267,10 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 
 void setting_CNFx(){
 
-    MCP2515_WriteByte(MCP2515_CNF1, 0x1);
+/*************https://github.com/electricimp/MCP2515#operation-mode-constants - Timing*************/
+/*http://microsin.net/adminstuff/hardware/mcp2515-stand-alone-can-controller-with-spi-interface.html - рус. даташит*/
+
+    MCP2515_WriteByte(MCP2515_CNF1, 0x2);
     MCP2515_WriteByte(MCP2515_CNF2, );
     MCP2515_WriteByte(MCP2515_CNF3, );
 

@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "MCP2515.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -30,8 +29,6 @@
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 
-uCAN_MSG	TxHeader1;
-uCAN_MSG	RxHeader1;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -82,6 +79,7 @@ uint8_t RxData[8] = {0,};
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 void RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
@@ -111,7 +109,6 @@ void set_TX_Header(CAN_TxHeaderTypeDef *TX){
 }
 
 /* USER CODE END 0 */
-
 
 /**
   * @brief  The application entry point.
@@ -150,7 +147,7 @@ int main(void)
 
   GPIO_init();
   ACC_init(&hi2c1);
-  MCP_settings();
+//  MCP_settings();
 
 
   /* USER CODE END 2 */
@@ -159,14 +156,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
-    SPI_Send(&TxHeader1);
-    CAN_Recieve(&hcan);
-    //RS_Send(&huart1);
+//    SPI_Send(&TxHeader1);
+//    CAN_Recieve(&hcan);
+    RS_Send(&huart1);
   }
   /* USER CODE END 3 */
 }
@@ -314,7 +310,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.OwnAddress1 = 36;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;
@@ -384,12 +380,12 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.Mode = UART_MODE_TX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {

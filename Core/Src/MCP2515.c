@@ -412,7 +412,7 @@ void CAN_Recieve(CAN_HandleTypeDef *hcan){
 	HAL_StatusTypeDef	status;
 	ctrl_rx_status_t 	rxStatus;
 
-//	rxStatus.ctrl_rx_status = MCP2515_GetRxStatus();
+	rxStatus.ctrl_rx_status = MCP2515_GetRxStatus();
 //
 //
 	status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RX_mailbox);

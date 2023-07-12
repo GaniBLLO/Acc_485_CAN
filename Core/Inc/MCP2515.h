@@ -282,13 +282,13 @@ typedef struct{
 typedef union{
     uint8_t	all;
     struct{
-	uint8_t	rsv	:1;
-	uint8_t	ABTF	:1;
-	uint8_t	MLOA	:1;
-	uint8_t	TXERR	:1;
-	uint8_t	TXREQ	:1;
-	uint8_t	reserv	:1;
-	uint8_t	TXP	:2;
+		uint8_t	rsv	:1;
+		uint8_t	ABTF	:1;
+		uint8_t	MLOA	:1;
+		uint8_t	TXERR	:1;
+		uint8_t	TXREQ	:1;
+		uint8_t	reserv	:1;
+		uint8_t	TXP	:2;
     }bit;
 }TXB_CTRL;
 

@@ -73,7 +73,7 @@ void SPI_Send();
 void MCP_settings();
 void CAN_Recieve();
 
-uint8_t RxData[8] = {0,};
+uint8_t RxData[8] = {0};
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,6 +84,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
     	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     }
 }
+
 
 /* USER CODE END 0 */
 
@@ -124,7 +125,6 @@ int main(void)
 
   ACC_init(&hi2c1);
   MCP_settings();
-
 
   /* USER CODE END 2 */
 
@@ -214,16 +214,16 @@ static void MX_CAN_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN_Init 2 */
+  sFilterConfig.FilterActivation = ENABLE;
   sFilterConfig.FilterBank = 0;
+  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0000;
-  sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;
-  sFilterConfig.FilterMaskIdLow = 0x0000;
-  sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-  sFilterConfig.FilterActivation = ENABLE;
-  //sFilterConfig.SlaveStartFilterBank = 14;
+  sFilterConfig.FilterIdHigh = 0xffff;
+  sFilterConfig.FilterIdLow = 0xffff;
+  sFilterConfig.FilterMaskIdHigh = 0xffff;
+  sFilterConfig.FilterMaskIdLow = 0xffff;
+  sFilterConfig.SlaveStartFilterBank = 10;
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){
       Error_Handler();
   }
@@ -288,7 +288,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.OwnAddress1 = 36;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;

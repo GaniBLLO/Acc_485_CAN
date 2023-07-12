@@ -34,6 +34,7 @@ extern RS_DATA_STRUCT	rs;
 SPI_CONFIG_REG	CANCTRL;
 
 ctrl_status_t		ctrl_status;
+ctrl_rx_status_t	re;
 
 
 /* MCP2515 초기화 */
@@ -289,9 +290,19 @@ void setting_CNFx(){
  * BRP = 1
  * SJW = 00 => 1*Tq */
 
-    MCP2515_WriteByte(MCP2515_CNF1, 0x1);
+    MCP2515_WriteByte(MCP2515_CNF1, 0x1);		//Настройка тактирования
     MCP2515_WriteByte(MCP2515_CNF2, 0xFF);
     MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+
+    MCP2515_WriteByte(MCP2515_TXB0CTRL, 0x0);		//Настройка состояния, приоритетности поступаемых сообщений в буфер
+    MCP2515_WriteByte(MCP2515_TXB1CTRL, 0x0);
+    MCP2515_WriteByte(MCP2515_TXB2CTRL, 0x0);
+
+    MCP2515_WriteByte(MCP2515_RXB0CTRL, 0x0);
+    MCP2515_WriteByte(MCP2515_RXB1CTRL, 0x0);
+
+    MCP2515_WriteByte(MCP2515_CANINTE, 0x0);
+    MCP2515_WriteByte(MCP2515_CANINTF, 0x0);
 
     RXF0 RXF0reg;
     RXF1 RXF1reg;
@@ -303,46 +314,46 @@ void setting_CNFx(){
     RXM1 RXM1reg;
 
     /* Intialize Rx Mask values */
-	RXM0reg.RXM0SIDH = 0x00;
-	RXM0reg.RXM0SIDL = 0x00;
-	RXM0reg.RXM0EID8 = 0x00;
-	RXM0reg.RXM0EID0 = 0x00;
+	RXM0reg.RXM0SIDH = 0xF;
+	RXM0reg.RXM0SIDL = 0xE3;
+	RXM0reg.RXM0EID8 = 0xf;
+	RXM0reg.RXM0EID0 = 0xf;
 
-	RXM1reg.RXM1SIDH = 0x00;
-	RXM1reg.RXM1SIDL = 0x00;
-	RXM1reg.RXM1EID8 = 0x00;
-	RXM1reg.RXM1EID0 = 0x00;
+	RXM1reg.RXM1SIDH = 0xF;
+	RXM1reg.RXM1SIDL = 0xE3;
+	RXM1reg.RXM1EID8 = 0xf;
+	RXM1reg.RXM1EID0 = 0xf;
 
 	/* Intialize Rx Filter values */
-	RXF0reg.RXF0SIDH = 0x00;
-	RXF0reg.RXF0SIDL = 0x00;      //Starndard Filter
-	RXF0reg.RXF0EID8 = 0x00;
-	RXF0reg.RXF0EID0 = 0x00;
+	RXF0reg.RXF0SIDH = 0xF;
+	RXF0reg.RXF0SIDL = 0xE0;      //Starndard Filter
+	RXF0reg.RXF0EID8 = 0xF;
+	RXF0reg.RXF0EID0 = 0xF;
 
-	RXF1reg.RXF1SIDH = 0x00;
-	RXF1reg.RXF1SIDL = 0x08;      //Exntended Filter
-	RXF1reg.RXF1EID8 = 0x00;
-	RXF1reg.RXF1EID0 = 0x00;
+	RXF1reg.RXF1SIDH = 0xF;
+	RXF1reg.RXF1SIDL = 0xE0;      //Exntended Filter
+	RXF1reg.RXF1EID8 = 0xF;
+	RXF1reg.RXF1EID0 = 0xF;
 
-	RXF2reg.RXF2SIDH = 0x00;
-	RXF2reg.RXF2SIDL = 0x00;
-	RXF2reg.RXF2EID8 = 0x00;
-	RXF2reg.RXF2EID0 = 0x00;
+	RXF2reg.RXF2SIDH = 0xF;
+	RXF2reg.RXF2SIDL = 0xE0;
+	RXF2reg.RXF2EID8 = 0xF;
+	RXF2reg.RXF2EID0 = 0xF;
 
-	RXF3reg.RXF3SIDH = 0x00;
-	RXF3reg.RXF3SIDL = 0x00;
-	RXF3reg.RXF3EID8 = 0x00;
-	RXF3reg.RXF3EID0 = 0x00;
+	RXF3reg.RXF3SIDH = 0xF;
+	RXF3reg.RXF3SIDL = 0xE0;
+	RXF3reg.RXF3EID8 = 0xF;
+	RXF3reg.RXF3EID0 = 0xF;
 
-	RXF4reg.RXF4SIDH = 0x00;
-	RXF4reg.RXF4SIDL = 0x00;
-	RXF4reg.RXF4EID8 = 0x00;
-	RXF4reg.RXF4EID0 = 0x00;
+	RXF4reg.RXF4SIDH = 0xF;
+	RXF4reg.RXF4SIDL = 0xE0;
+	RXF4reg.RXF4EID8 = 0xF;
+	RXF4reg.RXF4EID0 = 0xF;
 
-	RXF5reg.RXF5SIDH = 0x00;
-	RXF5reg.RXF5SIDL = 0x08;
-	RXF5reg.RXF5EID8 = 0x00;
-	RXF5reg.RXF5EID0 = 0x00;
+	RXF5reg.RXF5SIDH = 0xF;
+	RXF5reg.RXF5SIDL = 0xE0;		//08
+	RXF5reg.RXF5EID8 = 0xF;
+	RXF5reg.RXF5EID0 = 0xF;
 
     MCP2515_WriteByteSequence(MCP2515_RXM0SIDH, MCP2515_RXM0EID0, &(RXM0reg.RXM0SIDH));
     MCP2515_WriteByteSequence(MCP2515_RXM1SIDH, MCP2515_RXM1EID0, &(RXM1reg.RXM1SIDH));
@@ -376,7 +387,7 @@ void MCP_settings(){
 
 
 void SPI_Send(){
-    uint8_t	res, axis_data[9];
+    uint8_t	res;
     uCAN_MSG	struct_of_msg;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
@@ -414,13 +425,11 @@ void CAN_Recieve(CAN_HandleTypeDef *hcan){
 	int16_t			axis_x_data[1], axis_y_data[1], axis_z_data[1];
 	char 			buffer[50];
 	HAL_StatusTypeDef	status;
-	ctrl_rx_status_t 	rxStatus;
 
-	rxStatus.ctrl_rx_status = MCP2515_GetRxStatus();
-//
-//
+	re.ctrl_rx_status = MCP2515_GetRxStatus();
+
 	status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RX_mailbox);
-	    if(status == HAL_OK){
+	if(status == HAL_OK){
 		axis_x_data[0] = (RX_mailbox[0]<<8) | RX_mailbox[1];
 		axis_y_data[0] = (RX_mailbox[2]<<8) | RX_mailbox[3];
 		axis_z_data[0] = (RX_mailbox[4]<<8) | RX_mailbox[5];

@@ -375,8 +375,9 @@ void MCP_settings(){
 }
 
 
-void SPI_Send(CAN_TxHeaderTypeDef *TxHeader){
+void SPI_Send(){
     uint8_t	res, axis_data[9];
+    uCAN_MSG	struct_of_msg;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
 
@@ -385,18 +386,21 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxHeader){
 	res = HAL_SPI_GetState(&hspi1);
 	if(res == HAL_SPI_STATE_READY){
 
-	    axis_data[0] = OUT.X.bit.LO;
-	    axis_data[1] = OUT.X.bit.HI;
-	    axis_data[2] = OUT.Y.bit.LO;
-	    axis_data[3] = OUT.Y.bit.HI;
-	    axis_data[4] = OUT.Z.bit.LO;
-	    axis_data[5] = OUT.Z.bit.HI;
+	    struct_of_msg.frame.idType = 0x0;
+	    struct_of_msg.frame.id = 0x66 << 4;
+	    struct_of_msg.frame.dlc = 0x06;
+	    struct_of_msg.frame.data0 = OUT.X.bit.LO;
+	    struct_of_msg.frame.data1 = OUT.X.bit.HI;
+	    struct_of_msg.frame.data2 = OUT.Y.bit.LO;
+	    struct_of_msg.frame.data3 = OUT.Y.bit.HI;
+	    struct_of_msg.frame.data4 = OUT.Z.bit.LO;
+	    struct_of_msg.frame.data5 = OUT.Z.bit.HI;
 
 	    MCP2515_CS_LOW();
 	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-	    SPI_TxBuffer(NULL, 4);
-	    SPI_Tx(6);
-	    SPI_TxBuffer(axis_data, 6);
+	    SPI_TxBuffer( &(struct_of_msg.frame.idType), 4);
+	    SPI_Tx(struct_of_msg.frame.dlc);
+	    SPI_TxBuffer( &(struct_of_msg.frame.data0), struct_of_msg.frame.dlc);
 	    MCP2515_CS_HIGH();
 
 	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
@@ -416,7 +420,7 @@ void CAN_Recieve(CAN_HandleTypeDef *hcan){
 //
 //
 	status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RX_mailbox);
-//	    if(status == HAL_OK){
+	    if(status == HAL_OK){
 		axis_x_data[0] = (RX_mailbox[0]<<8) | RX_mailbox[1];
 		axis_y_data[0] = (RX_mailbox[2]<<8) | RX_mailbox[3];
 		axis_z_data[0] = (RX_mailbox[4]<<8) | RX_mailbox[5];
@@ -431,7 +435,7 @@ void CAN_Recieve(CAN_HandleTypeDef *hcan){
 		rs.RS_DataSended = 1;
 		rs.RS_DataReady = 0;
 
-//	    }
-//	else
-//	    rs.RS_DataSended = 0;
+	    }
+	else
+	    rs.RS_DataSended = 0;
 }

@@ -26,7 +26,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 
 /* USER CODE END PTD */
@@ -79,33 +78,11 @@ uint8_t RxData[8] = {0,};
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan){
+void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     }
-}
-
-void GPIO_init(){
-
-    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;				//Тактирование
-
-    GPIOC->CRH &= ~GPIO_CRH_CNF13;				//Oбнуление регистра CNF0/1 = 00
-    GPIOC->CRH |= GPIO_CRH_MODE13;				//MODE 11 => max 50MHz
-    GPIOC->BSRR |= GPIO_BSRR_BR13;
-}
-
-
-void set_TX_Header(CAN_TxHeaderTypeDef *TX){
-
-    TX->StdId 	= 0;
-    TX->ExtId 	= 0;
-    TX->IDE	= CAN_ID_STD;
-    TX->RTR 	= CAN_RTR_DATA;
-    TX->DLC 	= 6;
-    TX->TransmitGlobalTime = 0;
-
 }
 
 /* USER CODE END 0 */
@@ -145,9 +122,8 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  GPIO_init();
   ACC_init(&hi2c1);
-//  MCP_settings();
+  MCP_settings();
 
 
   /* USER CODE END 2 */
@@ -160,9 +136,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
-//    SPI_Send(&TxHeader1);
-//    CAN_Recieve(&hcan);
-    RS_Send(&huart1);
+    SPI_Send();
+    CAN_Recieve(&hcan);
+//    RS_Send(&huart1);
   }
   /* USER CODE END 3 */
 }
@@ -223,7 +199,7 @@ static void MX_CAN_Init(void)
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 4;
-  hcan.Init.Mode = CAN_MODE_NORMAL;
+  hcan.Init.Mode = CAN_MODE_SILENT;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
@@ -251,6 +227,8 @@ static void MX_CAN_Init(void)
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){
       Error_Handler();
   }
+
+
   if(HAL_CAN_Start(&hcan) != HAL_OK){
       Error_Handler();
    }
@@ -261,7 +239,7 @@ static void MX_CAN_Init(void)
 	  Error_Handler();
   }
 
-  set_TX_Header(&TxHeader);
+  //set_TX_Header(&TxHeader);
   /* USER CODE END CAN_Init 2 */
 
 }
@@ -310,7 +288,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 36;
+  hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;
@@ -380,12 +358,12 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 9600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {
@@ -409,12 +387,23 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SPI_CS_Pin */
   GPIO_InitStruct.Pin = SPI_CS_Pin;

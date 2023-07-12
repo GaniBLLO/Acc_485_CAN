@@ -20,9 +20,10 @@ void RS_Send(UART_HandleTypeDef *uart){
     HAL_StatusTypeDef	result;
 
     if(rs.RS_DataReady){
+
     sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)OUT.X.all, (int16_t)OUT.Y.all, (int16_t)OUT.Z.all);
 
-    result = HAL_UART_Transmit_IT(uart, (uint8_t*) buffer, strlen(buffer));
+    result = HAL_UART_Transmit(uart, (uint8_t*) buffer, strlen(buffer), 10);
     if(result == HAL_OK){
 
 		rs.RS_X_axis_data = 0;
@@ -31,7 +32,6 @@ void RS_Send(UART_HandleTypeDef *uart){
 
 		rs.RS_DataSended = 1;
 		rs.RS_DataReady = 0;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, SET);
     }
     else
     	rs.RS_DataSended = 0;

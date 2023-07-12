@@ -335,3 +335,4 @@ void MCP2515_BitModify(uint8_t address, uint8_t mask, uint8_t data);
 void MCP_settings();
 void setting_CNFx();
 #endif /* INC_MCP2515_H_ */
+

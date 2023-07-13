@@ -27,6 +27,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 CAN_RxHeaderTypeDef RxHeader;
+CAN_TxHeaderTypeDef TxHeader;
 
 /* USER CODE END PTD */
 
@@ -60,9 +61,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_CRC_Init(void);
 static void MX_CAN_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 void ACC_init();
 void GPIO_init();
@@ -118,9 +119,9 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
-  MX_CRC_Init();
   MX_CAN_Init();
   MX_SPI1_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 
   ACC_init(&hi2c1);
@@ -136,7 +137,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
-    SPI_Send();
+    SPI_Send(&TxHeader);
     CAN_Recieve(&hcan);
 //    RS_Send(&huart1);
   }
@@ -199,16 +200,16 @@ static void MX_CAN_Init(void)
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 4;
-  hcan.Init.Mode = CAN_MODE_SILENT;
+  hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
-  hcan.Init.AutoBusOff = ENABLE;
+  hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
-  hcan.Init.AutoRetransmission = ENABLE;
+  hcan.Init.AutoRetransmission = DISABLE;
   hcan.Init.ReceiveFifoLocked = DISABLE;
-  hcan.Init.TransmitFifoPriority = ENABLE;
+  hcan.Init.TransmitFifoPriority = DISABLE;
   if (HAL_CAN_Init(&hcan) != HAL_OK)
   {
     Error_Handler();
@@ -219,11 +220,11 @@ static void MX_CAN_Init(void)
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0xffff;
-  sFilterConfig.FilterIdLow = 0xffff;
-  sFilterConfig.FilterMaskIdHigh = 0xffff;
-  sFilterConfig.FilterMaskIdLow = 0xffff;
-  sFilterConfig.SlaveStartFilterBank = 10;
+  sFilterConfig.FilterIdHigh = 0x31 << 5;
+  sFilterConfig.FilterIdLow = 0;
+  sFilterConfig.FilterMaskIdHigh = 0x31 << 5;
+  sFilterConfig.FilterMaskIdLow = 0;
+  //sFilterConfig.SlaveStartFilterBank = 10;
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){
       Error_Handler();
   }
@@ -232,9 +233,11 @@ static void MX_CAN_Init(void)
   if(HAL_CAN_Start(&hcan) != HAL_OK){
       Error_Handler();
    }
+
   if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK){
 	  Error_Handler();
   }
+
   if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_ERROR) != HAL_OK){
 	  Error_Handler();
   }
@@ -288,7 +291,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 36;
+  hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   hi2c1.Init.OwnAddress2 = 0;

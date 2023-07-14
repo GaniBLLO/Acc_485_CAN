@@ -15,8 +15,7 @@
 
 /* Pin 설정에 맞게 수정필요. Modify below items for your SPI configurations */
 extern 	SPI_HandleTypeDef       hspi1;
-extern	CAN_RxHeaderTypeDef	RxHeader;
-extern 	UART_HandleTypeDef 	huart1;
+extern 	UART_HandleTypeDef 		huart1;
 #define SPI_CAN                 &hspi1
 #define SPI_TIMEOUT             10
 
@@ -33,7 +32,6 @@ extern OUT_DATA		OUT;
 extern RS_DATA_STRUCT	rs;
 
 ctrl_status_t		ctrl_status;
-ctrl_rx_status_t	re;
 
 
 /* MCP2515 초기화 */
@@ -387,113 +385,109 @@ void MCP_settings(){
 
 void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
     uint8_t	res;
-    //uCAN_MSG	struct_of_msg;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
 
     if(ctrl_status.TXB0REQ != 1){
 
-	res = HAL_SPI_GetState(&hspi1);
-	if(res == HAL_SPI_STATE_READY){
+		res = HAL_SPI_GetState(&hspi1);
+		if(res == HAL_SPI_STATE_READY){
 
-	    uint8_t	axis_data[6];
+			uint8_t	axis_data[6];
 
-	    TxBuff->StdId = 0x31 << 5;
-	    TxBuff->ExtId = 0x0;
-	    TxBuff->IDE = CAN_ID_STD;
-	    TxBuff->RTR = CAN_RTR_DATA;
-	    TxBuff->DLC = 6;
-	    TxBuff->TransmitGlobalTime = DISABLE;
+			//TxBuff->StdId = 0x31;
 
+			axis_data[0] = OUT.X.bit.LO;
+			axis_data[1] = OUT.X.bit.HI;
+			axis_data[2] = OUT.Y.bit.LO;
+			axis_data[3] = OUT.Y.bit.HI;
+			axis_data[4] = OUT.Z.bit.LO;
+			axis_data[5] = OUT.Z.bit.HI;
 
-//	    struct_of_msg.frame.idType = 0x0;
-//	    struct_of_msg.frame.id = 0x30 << 5;
-//	    struct_of_msg.frame.dlc = 0x06;
-//	    struct_of_msg.frame.data0 = OUT.X.bit.LO;
-//	    struct_of_msg.frame.data1 = OUT.X.bit.HI;
-//	    struct_of_msg.frame.data2 = OUT.Y.bit.LO;
-//	    struct_of_msg.frame.data3 = OUT.Y.bit.HI;
-//	    struct_of_msg.frame.data4 = OUT.Z.bit.LO;
-//	    struct_of_msg.frame.data5 = OUT.Z.bit.HI;
+			MCP2515_CS_LOW();
+			SPI_Tx(MCP2515_LOAD_TXB0SIDH);
+			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
+			SPI_Tx(6);
+			SPI_TxBuffer(axis_data, 6);
+			MCP2515_CS_HIGH();
 
-	    axis_data[0] = OUT.X.bit.LO;
-	    axis_data[1] = OUT.X.bit.HI;
-	    axis_data[2] = OUT.Y.bit.LO;
-	    axis_data[3] = OUT.Y.bit.HI;
-	    axis_data[4] = OUT.Z.bit.LO;
-	    axis_data[5] = OUT.Z.bit.HI;
-
-	    MCP2515_CS_LOW();
-	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-	    SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
-	    SPI_Tx(6);
-	    SPI_TxBuffer(axis_data, 6);
-	    MCP2515_CS_HIGH();
-
-	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
-	}
+			MCP2515_RequestToSend(MCP2515_RTS_TX0);
+		}
     }
-//    else if(ctrl_status.TXB1REQ != 1){
-//
-//	struct_of_msg.frame.idType = 0x0;
-//	struct_of_msg.frame.id = 0x30 << 5;
-//	struct_of_msg.frame.dlc = 0x06;
-//	struct_of_msg.frame.data0 = OUT.X.bit.LO;
-//	struct_of_msg.frame.data1 = OUT.X.bit.HI;
-//	struct_of_msg.frame.data2 = OUT.Y.bit.LO;
-//	struct_of_msg.frame.data3 = OUT.Y.bit.HI;
-//	struct_of_msg.frame.data4 = OUT.Z.bit.LO;
-//	struct_of_msg.frame.data5 = OUT.Z.bit.HI;
-//
-//	MCP2515_CS_LOW();
-//	SPI_Tx(MCP2515_LOAD_TXB1SIDH);
-//	SPI_TxBuffer( &(struct_of_msg.frame.idType), 4);
-//	SPI_Tx(struct_of_msg.frame.dlc);
-//	SPI_TxBuffer( &(struct_of_msg.frame.data0), struct_of_msg.frame.dlc);
-//	MCP2515_CS_HIGH();
-//
-//	MCP2515_RequestToSend(MCP2515_RTS_TX1);
-//    }
-//    else if(ctrl_status.TXB2REQ != 1){
-//
-//	struct_of_msg.frame.idType = 0x0;
-//	struct_of_msg.frame.id = 0x30 << 5;
-//	struct_of_msg.frame.dlc = 0x06;
-//	struct_of_msg.frame.data0 = OUT.X.bit.LO;
-//	struct_of_msg.frame.data1 = OUT.X.bit.HI;
-//	struct_of_msg.frame.data2 = OUT.Y.bit.LO;
-//	struct_of_msg.frame.data3 = OUT.Y.bit.HI;
-//	struct_of_msg.frame.data4 = OUT.Z.bit.LO;
-//	struct_of_msg.frame.data5 = OUT.Z.bit.HI;
-//
-//	MCP2515_CS_LOW();
-//	SPI_Tx(MCP2515_LOAD_TXB2SIDH);
-//	SPI_TxBuffer( &(struct_of_msg.frame.idType), 4);
-//	SPI_Tx(struct_of_msg.frame.dlc);
-//	SPI_TxBuffer( &(struct_of_msg.frame.data0), struct_of_msg.frame.dlc);
-//	MCP2515_CS_HIGH();
-//
-//	MCP2515_RequestToSend(MCP2515_RTS_TX2);
-//    }
+    else if(ctrl_status.TXB1REQ != 1){
+
+    	res = HAL_SPI_GetState(&hspi1);
+		if(res == HAL_SPI_STATE_READY){
+
+			uint8_t	axis_data[6];
+
+			//TxBuff->StdId = 0x41;
+
+			axis_data[0] = OUT.X.bit.LO;
+			axis_data[1] = OUT.X.bit.HI;
+			axis_data[2] = OUT.Y.bit.LO;
+			axis_data[3] = OUT.Y.bit.HI;
+			axis_data[4] = OUT.Z.bit.LO;
+			axis_data[5] = OUT.Z.bit.HI;
+
+			MCP2515_CS_LOW();
+			SPI_Tx(MCP2515_LOAD_TXB1SIDH);
+			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
+			SPI_Tx(6);
+			SPI_TxBuffer(axis_data, 6);
+			MCP2515_CS_HIGH();
+
+			MCP2515_RequestToSend(MCP2515_RTS_TX1);
+		}
+    }
+    else if(ctrl_status.TXB2REQ != 1){
+
+    	res = HAL_SPI_GetState(&hspi1);
+		if(res == HAL_SPI_STATE_READY){
+
+			uint8_t	axis_data[6];
+
+			//TxBuff->StdId = 0x51;
+
+			axis_data[0] = OUT.X.bit.LO;
+			axis_data[1] = OUT.X.bit.HI;
+			axis_data[2] = OUT.Y.bit.LO;
+			axis_data[3] = OUT.Y.bit.HI;
+			axis_data[4] = OUT.Z.bit.LO;
+			axis_data[5] = OUT.Z.bit.HI;
+
+			MCP2515_CS_LOW();
+			SPI_Tx(MCP2515_LOAD_TXB2SIDH);
+			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
+			SPI_Tx(6);
+			SPI_TxBuffer(axis_data, 6);
+			MCP2515_CS_HIGH();
+
+			MCP2515_RequestToSend(MCP2515_RTS_TX2);
+		}
+    }
 }
 
 
-void CAN_Recieve(CAN_HandleTypeDef *hcan){
+void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff){
 	uint8_t			RX_mailbox[6];
 	char 			buffer[50];
 	OUT_DATA		RX_CAN_Data;
 	HAL_StatusTypeDef	result;
+	ctrl_rx_status_t	rxStatus;
 
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RX_mailbox);
+//	rxStatus.ctrl_rx_status = MCP2515_GetRxStatus();
+	uint32_t	msgs = HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0);
+	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, RxBuff, RX_mailbox);
 
-	    if(RxHeader.StdId == 1568){
+	    if(RxBuff->StdId == 0x51){
 
 		RX_CAN_Data.X.bit.LO = RX_mailbox[5] & 0x0f;
-		RX_CAN_Data.X.bit.HI = RX_mailbox[4] & 0xf0;
+		RX_CAN_Data.X.bit.HI = RX_mailbox[4] & 0x0f;
 		RX_CAN_Data.Y.bit.LO = RX_mailbox[3] & 0x0f;
-		RX_CAN_Data.Y.bit.HI = RX_mailbox[2] & 0xf0;
+		RX_CAN_Data.Y.bit.HI = RX_mailbox[2] & 0x0f;
 		RX_CAN_Data.Z.bit.LO = RX_mailbox[1] & 0x0f;
-		RX_CAN_Data.Z.bit.HI = RX_mailbox[0] & 0xf0;
+		RX_CAN_Data.Z.bit.HI = RX_mailbox[0] & 0x0f;
 
 		sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
 		HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);
@@ -512,6 +506,6 @@ void CAN_Recieve(CAN_HandleTypeDef *hcan){
 
 	    }
 	    else
-		rs.RS_DataSended = 0;
-	//}
+	    	rs.RS_DataSended = 0;
+//	}
 }

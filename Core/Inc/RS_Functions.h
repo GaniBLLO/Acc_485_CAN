@@ -24,7 +24,7 @@ typedef struct{
 
 void RS_Send(UART_HandleTypeDef *uart);
 void RS_Receive(UART_HandleTypeDef *uart);
-void SPI_Send();
-void CAN_Recieve(CAN_HandleTypeDef *hcan);
+void SPI_Send(CAN_TxHeaderTypeDef *TxBuff);
+void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff);
 
 #endif /* INC_RS_FUNCTIONS_H_ */

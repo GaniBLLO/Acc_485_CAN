@@ -288,8 +288,8 @@ void setting_CNFx(){
  * SJW = 00 => 1*Tq */
 
     MCP2515_WriteByte(MCP2515_CNF1, 0x1);		//Настройка тактирования
-    MCP2515_WriteByte(MCP2515_CNF2, 0xFF);
-    MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+    MCP2515_WriteByte(MCP2515_CNF2, 0xFF);		//FF
+    MCP2515_WriteByte(MCP2515_CNF3, 0x2);		//82
 
     MCP2515_WriteByte(MCP2515_TXB0CTRL, 0x0);		//Настройка состояния, приоритетности поступаемых сообщений в буфер
     MCP2515_WriteByte(MCP2515_TXB1CTRL, 0x0);
@@ -311,46 +311,46 @@ void setting_CNFx(){
     RXM1 RXM1reg;
 
     /* Intialize Rx Mask values */
-	RXM0reg.RXM0SIDH = 0x0;
-	RXM0reg.RXM0SIDL = 0x0;
-	RXM0reg.RXM0EID8 = 0x0;
-	RXM0reg.RXM0EID0 = 0x0;
+    RXM0reg.RXM0SIDH = 0x0;
+    RXM0reg.RXM0SIDL = 0x0;
+    RXM0reg.RXM0EID8 = 0x0;
+    RXM0reg.RXM0EID0 = 0x0;
 
-	RXM1reg.RXM1SIDH = 0x0;
-	RXM1reg.RXM1SIDL = 0x0;
-	RXM1reg.RXM1EID8 = 0x0;
-	RXM1reg.RXM1EID0 = 0x0;
+    RXM1reg.RXM1SIDH = 0x0;
+    RXM1reg.RXM1SIDL = 0x0;
+    RXM1reg.RXM1EID8 = 0x0;
+    RXM1reg.RXM1EID0 = 0x0;
 
-	/* Intialize Rx Filter values */
-	RXF0reg.RXF0SIDH = 0x0;
-	RXF0reg.RXF0SIDL = 0x0;      //Starndard Filter
-	RXF0reg.RXF0EID8 = 0x0;
-	RXF0reg.RXF0EID0 = 0x0;
+    /* Intialize Rx Filter values */
+    RXF0reg.RXF0SIDH = 0x0;
+    RXF0reg.RXF0SIDL = 0x0;      //Starndard Filter
+    RXF0reg.RXF0EID8 = 0x0;
+    RXF0reg.RXF0EID0 = 0x0;
 
-	RXF1reg.RXF1SIDH = 0x0;
-	RXF1reg.RXF1SIDL = 0x0;      //Exntended Filter
-	RXF1reg.RXF1EID8 = 0x0;
-	RXF1reg.RXF1EID0 = 0x0;
+    RXF1reg.RXF1SIDH = 0x0;
+    RXF1reg.RXF1SIDL = 0x0;      //Exntended Filter
+    RXF1reg.RXF1EID8 = 0x0;
+    RXF1reg.RXF1EID0 = 0x0;
 
-	RXF2reg.RXF2SIDH = 0x0;
-	RXF2reg.RXF2SIDL = 0x0;
-	RXF2reg.RXF2EID8 = 0x0;
-	RXF2reg.RXF2EID0 = 0x0;
+    RXF2reg.RXF2SIDH = 0x0;
+    RXF2reg.RXF2SIDL = 0x0;
+    RXF2reg.RXF2EID8 = 0x0;
+    RXF2reg.RXF2EID0 = 0x0;
 
-	RXF3reg.RXF3SIDH = 0x0;
-	RXF3reg.RXF3SIDL = 0x0;
-	RXF3reg.RXF3EID8 = 0x0;
-	RXF3reg.RXF3EID0 = 0x0;
+    RXF3reg.RXF3SIDH = 0x0;
+    RXF3reg.RXF3SIDL = 0x0;
+    RXF3reg.RXF3EID8 = 0x0;
+    RXF3reg.RXF3EID0 = 0x0;
 
-	RXF4reg.RXF4SIDH = 0x0;
-	RXF4reg.RXF4SIDL = 0x0;
-	RXF4reg.RXF4EID8 = 0x0;
-	RXF4reg.RXF4EID0 = 0x0;
+    RXF4reg.RXF4SIDH = 0x0;
+    RXF4reg.RXF4SIDL = 0x0;
+    RXF4reg.RXF4EID8 = 0x0;
+    RXF4reg.RXF4EID0 = 0x0;
 
-	RXF5reg.RXF5SIDH = 0x0;
-	RXF5reg.RXF5SIDL = 0x0;		//08
-	RXF5reg.RXF5EID8 = 0x0;
-	RXF5reg.RXF5EID0 = 0x0;
+    RXF5reg.RXF5SIDH = 0x0;
+    RXF5reg.RXF5SIDL = 0x0;		//08
+    RXF5reg.RXF5EID8 = 0x0;
+    RXF5reg.RXF5EID0 = 0x0;
 
     MCP2515_WriteByteSequence(MCP2515_RXM0SIDH, MCP2515_RXM0EID0, &(RXM0reg.RXM0SIDH));
     MCP2515_WriteByteSequence(MCP2515_RXM1SIDH, MCP2515_RXM1EID0, &(RXM1reg.RXM1SIDH));
@@ -385,109 +385,92 @@ void MCP_settings(){
 
 void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
     uint8_t	res;
+//    uCAN_MSG	CAN;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
 
     if(ctrl_status.TXB0REQ != 1){
 
-		res = HAL_SPI_GetState(&hspi1);
-		if(res == HAL_SPI_STATE_READY){
+	res = HAL_SPI_GetState(&hspi1);
+	if(res == HAL_SPI_STATE_READY){
 
-			uint8_t	axis_data[6];
+	    static uint8_t	axis_x_data[2];
+	    axis_x_data[0] = OUT.X.bit.LO;
+	    axis_x_data[1] = OUT.X.bit.HI;
 
-			//TxBuff->StdId = 0x31;
+	    MCP2515_CS_LOW();
+	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
+	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
+	    HAL_Delay(5);
+	    SPI_TxBuffer(axis_x_data, 2);
+	    HAL_Delay(5);
+	    MCP2515_CS_HIGH();
 
-			axis_data[0] = OUT.X.bit.LO;
-			axis_data[1] = OUT.X.bit.HI;
-			axis_data[2] = OUT.Y.bit.LO;
-			axis_data[3] = OUT.Y.bit.HI;
-			axis_data[4] = OUT.Z.bit.LO;
-			axis_data[5] = OUT.Z.bit.HI;
-
-			MCP2515_CS_LOW();
-			SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
-			SPI_Tx(6);
-			SPI_TxBuffer(axis_data, 6);
-			MCP2515_CS_HIGH();
-
-			MCP2515_RequestToSend(MCP2515_RTS_TX0);
-		}
+	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
+	}
     }
-    else if(ctrl_status.TXB1REQ != 1){
+
+    if(ctrl_status.TXB1REQ != 1){
 
     	res = HAL_SPI_GetState(&hspi1);
-		if(res == HAL_SPI_STATE_READY){
+	if(res == HAL_SPI_STATE_READY){
 
-			uint8_t	axis_data[6];
+	    static uint8_t	axis_y_data[2];
+	    axis_y_data[0] = OUT.Y.bit.LO;
+	    axis_y_data[1] = OUT.Y.bit.HI;
 
-			//TxBuff->StdId = 0x41;
+	    MCP2515_CS_LOW();
+	    SPI_Tx(MCP2515_LOAD_TXB1SIDH);
+	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
+	    HAL_Delay(5);
+	    SPI_TxBuffer(axis_y_data, 2);
+	    HAL_Delay(5);
+	    MCP2515_CS_HIGH();
 
-			axis_data[0] = OUT.X.bit.LO;
-			axis_data[1] = OUT.X.bit.HI;
-			axis_data[2] = OUT.Y.bit.LO;
-			axis_data[3] = OUT.Y.bit.HI;
-			axis_data[4] = OUT.Z.bit.LO;
-			axis_data[5] = OUT.Z.bit.HI;
-
-			MCP2515_CS_LOW();
-			SPI_Tx(MCP2515_LOAD_TXB1SIDH);
-			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
-			SPI_Tx(6);
-			SPI_TxBuffer(axis_data, 6);
-			MCP2515_CS_HIGH();
-
-			MCP2515_RequestToSend(MCP2515_RTS_TX1);
-		}
+	    MCP2515_RequestToSend(MCP2515_RTS_TX1);
+	}
     }
-    else if(ctrl_status.TXB2REQ != 1){
+
+    if(ctrl_status.TXB2REQ != 1){
 
     	res = HAL_SPI_GetState(&hspi1);
-		if(res == HAL_SPI_STATE_READY){
+	if(res == HAL_SPI_STATE_READY){
 
-			uint8_t	axis_data[6];
+	    static uint8_t	axis_z_data[2];
+	    axis_z_data[0] = OUT.Z.bit.LO;
+	    axis_z_data[1] = OUT.Z.bit.HI;
 
-			//TxBuff->StdId = 0x51;
+	    MCP2515_CS_LOW();
+	    SPI_Tx(MCP2515_LOAD_TXB2SIDH);
+	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
+	    HAL_Delay(5);
+	    SPI_TxBuffer(axis_z_data, 2);
+	    HAL_Delay(5);
+	    MCP2515_CS_HIGH();
 
-			axis_data[0] = OUT.X.bit.LO;
-			axis_data[1] = OUT.X.bit.HI;
-			axis_data[2] = OUT.Y.bit.LO;
-			axis_data[3] = OUT.Y.bit.HI;
-			axis_data[4] = OUT.Z.bit.LO;
-			axis_data[5] = OUT.Z.bit.HI;
-
-			MCP2515_CS_LOW();
-			SPI_Tx(MCP2515_LOAD_TXB2SIDH);
-			SPI_TxBuffer( (uint8_t*) &(TxBuff->StdId), 5);
-			SPI_Tx(6);
-			SPI_TxBuffer(axis_data, 6);
-			MCP2515_CS_HIGH();
-
-			MCP2515_RequestToSend(MCP2515_RTS_TX2);
-		}
+	    MCP2515_RequestToSend(MCP2515_RTS_TX2);
+	}
     }
 }
 
 
-void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff){
+void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff, CAN_TxHeaderTypeDef *TxBuff){
 	uint8_t			RX_mailbox[6];
 	char 			buffer[50];
 	OUT_DATA		RX_CAN_Data;
 	HAL_StatusTypeDef	result;
-	ctrl_rx_status_t	rxStatus;
 
-//	rxStatus.ctrl_rx_status = MCP2515_GetRxStatus();
-	uint32_t	msgs = HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0);
+
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, RxBuff, RX_mailbox);
 
-	    if(RxBuff->StdId == 0x51){
+	    if(RxBuff->StdId == 120){
 
-		RX_CAN_Data.X.bit.LO = RX_mailbox[5] & 0x0f;
-		RX_CAN_Data.X.bit.HI = RX_mailbox[4] & 0x0f;
-		RX_CAN_Data.Y.bit.LO = RX_mailbox[3] & 0x0f;
-		RX_CAN_Data.Y.bit.HI = RX_mailbox[2] & 0x0f;
-		RX_CAN_Data.Z.bit.LO = RX_mailbox[1] & 0x0f;
-		RX_CAN_Data.Z.bit.HI = RX_mailbox[0] & 0x0f;
+		RX_CAN_Data.X.bit.LO = RX_mailbox[0] & 0x0f;
+		RX_CAN_Data.X.bit.HI = RX_mailbox[1] & 0x0f;
+		RX_CAN_Data.Y.bit.LO = RX_mailbox[2] & 0x0f;
+		RX_CAN_Data.Y.bit.HI = RX_mailbox[3] & 0x0f;
+		RX_CAN_Data.Z.bit.LO = RX_mailbox[4] & 0x0f;
+		RX_CAN_Data.Z.bit.HI = RX_mailbox[5] & 0x0f;
 
 		sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
 		HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);

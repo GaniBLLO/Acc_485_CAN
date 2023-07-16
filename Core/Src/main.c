@@ -21,7 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#include "stdbool.h"
 #include "RS_Functions.h"
 /* USER CODE END Includes */
 
@@ -66,12 +65,11 @@ static void MX_CAN_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 
-void CANSPI_isTxErrorPassive();
 void update_ACC_data();
 void set_SPI_Header();
-void set_CAN_Header();
 void en_peripheria();
 void MCP_settings();
+void check_errors();
 void CAN_Recieve();
 void SPI_Send();
 void ACC_init();
@@ -159,8 +157,9 @@ int main(void)
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
     SPI_Send(&Tx_SPI_Header);
-	//HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &RxHeader, RxData);
-    CAN_Recieve(&hcan, &Rx_CAN_Header, RxData);
+    CAN_Recieve(&huart1, &Rx_CAN_Header, RxData);
+
+    check_errors(&hcan);
 //    RS_Send(&huart1);
   }
   /* USER CODE END 3 */

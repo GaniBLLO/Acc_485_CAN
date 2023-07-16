@@ -32,7 +32,6 @@ static uint8_t SPI_Rx(void);
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length);
 
 extern OUT_DATA			OUT;
-OUT_DATA				RX_CAN_Data;
 extern RS_DATA_STRUCT	rs;
 ctrl_error_status_t		err;
 ctrl_status_t			ctrl_status;
@@ -397,12 +396,6 @@ void MCP_settings(){
 
 void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
     uint8_t	res;
-//    uCAN_MSG	msg;
-//    msg.frame.idType = 0x0;
-//    msg.frame.id = 0x37 << 5;
-//    msg.frame.dlc = 2;
-//    msg.frame.data0 = 0x1;
-//    msg.frame.data1 = 0x4D;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
 
@@ -432,6 +425,60 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 			MCP2515_RequestToSend(MCP2515_RTS_TX0);
 		}
     }
+//
+//    if(ctrl_status.TXB1REQ != 1){
+//
+//		res = HAL_SPI_GetState(&hspi1);
+//		if(res == HAL_SPI_STATE_READY){
+//
+//			uint8_t	axis_x_data[6];
+//
+//			axis_x_data[0] = OUT.X.bit.LO;
+//			axis_x_data[1] = OUT.X.bit.HI;
+//			axis_x_data[2] = OUT.Y.bit.LO;
+//			axis_x_data[3] = OUT.Y.bit.HI;
+//			axis_x_data[4] = OUT.Z.bit.LO;
+//			axis_x_data[5] = OUT.Z.bit.HI;
+//
+//
+//			MCP2515_CS_LOW();
+//			SPI_Tx(MCP2515_LOAD_TXB1SIDH);
+//		    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
+//			SPI_Tx((uint8_t)TxBuff->DLC);
+//			SPI_TxBuffer(axis_x_data, (uint8_t)TxBuff->DLC);
+//			SPI_TxBuffer(axis_x_data, 2);
+//			MCP2515_CS_HIGH();
+//
+//			MCP2515_RequestToSend(MCP2515_RTS_TX1);
+//		}
+//    }
+//
+//    if(ctrl_status.TXB2REQ != 1){
+//
+//		res = HAL_SPI_GetState(&hspi1);
+//		if(res == HAL_SPI_STATE_READY){
+//
+//			uint8_t	axis_x_data[6];
+//
+//			axis_x_data[0] = OUT.X.bit.LO;
+//			axis_x_data[1] = OUT.X.bit.HI;
+//			axis_x_data[2] = OUT.Y.bit.LO;
+//			axis_x_data[3] = OUT.Y.bit.HI;
+//			axis_x_data[4] = OUT.Z.bit.LO;
+//			axis_x_data[5] = OUT.Z.bit.HI;
+//
+//
+//			MCP2515_CS_LOW();
+//			SPI_Tx(MCP2515_LOAD_TXB2SIDH);
+//		    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
+//			SPI_Tx((uint8_t)TxBuff->DLC);
+//			SPI_TxBuffer(axis_x_data, (uint8_t)TxBuff->DLC);
+//			SPI_TxBuffer(axis_x_data, 2);
+//			MCP2515_CS_HIGH();
+//
+//			MCP2515_RequestToSend(MCP2515_RTS_TX2);
+//		}
+//    }
 }
 
 void check_errors(CAN_HandleTypeDef *hcan){
@@ -499,38 +546,3 @@ uint8_t CANSPI_isRxErrorPassive(void)
   return (returnValue);
 }
 
-void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff, uint8_t *rx_ml){
-	char 			buffer[50];
-
-	HAL_StatusTypeDef	result;
-
-
-	check_errors(hcan);
-
-		if(rs.RS_DataReady){
-
-			RX_CAN_Data.X.bit.LO = rx_ml[0];// & 0x0f;
-			RX_CAN_Data.X.bit.HI = rx_ml[1];// & 0x0f;
-			RX_CAN_Data.Y.bit.LO = rx_ml[2];// & 0x0f;
-			RX_CAN_Data.Y.bit.HI = rx_ml[3];// & 0x0f;
-			RX_CAN_Data.Z.bit.LO = rx_ml[4];// & 0x0f;
-			RX_CAN_Data.Z.bit.HI = rx_ml[5];// & 0x0f;
-
-			sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
-			HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);
-
-			result = HAL_UART_Transmit(&huart1, (uint8_t*) buffer, strlen(buffer), 10);
-			if(result == HAL_OK){
-
-				rs.RS_X_axis_data = 0;
-				rs.RS_Y_axis_data = 0;
-				rs.RS_Z_axis_data = 0;
-
-				rs.RS_DataSended = 1;
-				rs.RS_DataReady = 0;
-				//break;
-				}
-		}
-			else
-				rs.RS_DataSended = 0;
-}

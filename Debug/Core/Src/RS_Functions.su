@@ -1,1 +1,2 @@
-../Core/Src/RS_Functions.c:17:6:RS_Send	80	static
+../Core/Src/RS_Functions.c:19:6:RS_Send	80	static
+../Core/Src/RS_Functions.c:48:6:CAN_Recieve	88	static

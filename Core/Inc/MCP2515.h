@@ -64,8 +64,8 @@
 #define MCP2515_RXF5SIDL	0x19	//ok
 #define MCP2515_RXF5EID8	0x1A
 #define MCP2515_RXF5EID0	0x1B
-#define MCP2515_TEC		0x1C
-#define MCP2515_REC		0x1D
+#define MCP2515_TEC			0x1C
+#define MCP2515_REC			0x1D
 
 #define MCP2515_RXM0SIDH	0x20	//ok
 #define MCP2515_RXM0SIDL	0x21	//ok
@@ -292,13 +292,24 @@ typedef union{
     }bit;
 }TXB_CTRL;
 
+typedef union{
+	uint8_t	all;
+	struct{
+		uint8_t	TX_err	:8;
+		uint8_t	RX_err	:8;
+	}bit;
+}COUNT_ERRORS;
+
 
 typedef	struct{
-    TXB_CTRL	TXB0CTRL;
-    TXB_CTRL	TXB1CTRL;
-    TXB_CTRL	TXB2CTRL;
+    TXB_CTRL			TXB0CTRL;
+    TXB_CTRL			TXB1CTRL;
+    TXB_CTRL			TXB2CTRL;
+    COUNT_ERRORS		CNT_ERRORS;
+    ctrl_error_status_t	REG_ERRORS;
 }TX_CTRL;
 
+#define TX_CNTRL_DEFAULT		{{0x0}, {0x0}, {0x0}, {0x0}}
 typedef union {
   struct {
     uint8_t idType;
@@ -332,7 +343,15 @@ void MCP2515_RequestToSend(uint8_t instruction);
 uint8_t MCP2515_ReadStatus(void);
 uint8_t MCP2515_GetRxStatus(void);
 void MCP2515_BitModify(uint8_t address, uint8_t mask, uint8_t data);
-void MCP_settings();
-void setting_CNFx();
+
+
+
+void MCP_settings(void);
+void setting_CNFx(void);
+void check_errors(CAN_HandleTypeDef *hcan);
+uint8_t CANSPI_isBussOff(void);
+uint8_t CANSPI_isRxErrorPassive(void);
+uint8_t CANSPI_isTxErrorPassive(void);
+void en_peripheria(CAN_HandleTypeDef *hcan);
 #endif /* INC_MCP2515_H_ */
 

@@ -17,7 +17,10 @@
 extern 	SPI_HandleTypeDef       hspi1;
 extern 	UART_HandleTypeDef 		huart1;
 #define SPI_CAN                 &hspi1
-#define SPI_TIMEOUT             10
+#define SPI_TIMEOUT             100
+
+
+
 
 #define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
 #define MCP2515_CS_LOW()    HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET)
@@ -28,10 +31,12 @@ static void SPI_TxBuffer(uint8_t *buffer, uint8_t length);
 static uint8_t SPI_Rx(void);
 static void SPI_RxBuffer(uint8_t *buffer, uint8_t length);
 
-extern OUT_DATA		OUT;
+extern OUT_DATA			OUT;
+OUT_DATA				RX_CAN_Data;
 extern RS_DATA_STRUCT	rs;
-
-ctrl_status_t		ctrl_status;
+ctrl_error_status_t		err;
+ctrl_status_t			ctrl_status;
+TX_CTRL					CTRL = TX_CNTRL_DEFAULT;
 
 
 /* MCP2515 초기화 */
@@ -274,7 +279,22 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
   HAL_SPI_Receive(SPI_CAN, buffer, length, SPI_TIMEOUT);
 }
 
+void en_peripheria(CAN_HandleTypeDef *hcan){
 
+	if(HAL_CAN_Start(hcan) != HAL_OK){
+	  Error_Handler();
+	}
+
+	if(HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK){
+	  Error_Handler();
+	}
+
+	if(HAL_CAN_ActivateNotification(hcan, CAN_IT_ERROR) != HAL_OK){
+	  Error_Handler();
+	}
+	/*Setting normal mode*/
+	  while(MCP2515_SetNormalMode() != true);
+}
 void setting_CNFx(){
 
 /*https://github.com/eziya/STM32_SPI_MCP2515/blob/master/Src/CANSPI.c#L202*/
@@ -288,8 +308,8 @@ void setting_CNFx(){
  * SJW = 00 => 1*Tq */
 
     MCP2515_WriteByte(MCP2515_CNF1, 0x1);		//Настройка тактирования
-    MCP2515_WriteByte(MCP2515_CNF2, 0xFF);		//FF
-    MCP2515_WriteByte(MCP2515_CNF3, 0x2);		//82
+    MCP2515_WriteByte(MCP2515_CNF2, 0xB1);		//FF
+    MCP2515_WriteByte(MCP2515_CNF3, 0x85);		//82
 
     MCP2515_WriteByte(MCP2515_TXB0CTRL, 0x0);		//Настройка состояния, приоритетности поступаемых сообщений в буфер
     MCP2515_WriteByte(MCP2515_TXB1CTRL, 0x0);
@@ -360,10 +380,6 @@ void setting_CNFx(){
     MCP2515_WriteByteSequence(MCP2515_RXF3SIDH, MCP2515_RXF3EID0, &(RXF3reg.RXF3SIDH));
     MCP2515_WriteByteSequence(MCP2515_RXF4SIDH, MCP2515_RXF4EID0, &(RXF4reg.RXF4SIDH));
     MCP2515_WriteByteSequence(MCP2515_RXF5SIDH, MCP2515_RXF5EID0, &(RXF5reg.RXF5SIDH));
-
-
-/*Setting normal mode*/
-    while(MCP2515_SetNormalMode() != true);
 }
 
 void MCP_settings(){
@@ -372,123 +388,149 @@ void MCP_settings(){
 
     result = HAL_SPI_GetState(&hspi1);
      if(result == HAL_SPI_STATE_READY)
-         while(MCP2515_SetConfigMode() != true);
+    	 MCP2515_Reset();
+     HAL_Delay(3);
 
     setting_CNFx();
-    GPIOC->BSRR |= GPIO_BSRR_BS13;
-    HAL_Delay(1000);
-    GPIOC->BSRR |= GPIO_BSRR_BR13;
-    HAL_Delay(1000);
-    GPIOC->BSRR |= GPIO_BSRR_BS13;
 }
 
 
 void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
     uint8_t	res;
-//    uCAN_MSG	CAN;
+//    uCAN_MSG	msg;
+//    msg.frame.idType = 0x0;
+//    msg.frame.id = 0x37 << 5;
+//    msg.frame.dlc = 2;
+//    msg.frame.data0 = 0x1;
+//    msg.frame.data1 = 0x4D;
 
     ctrl_status.ctrl_status = MCP2515_ReadStatus();
 
     if(ctrl_status.TXB0REQ != 1){
 
-	res = HAL_SPI_GetState(&hspi1);
-	if(res == HAL_SPI_STATE_READY){
+		res = HAL_SPI_GetState(&hspi1);
+		if(res == HAL_SPI_STATE_READY){
 
-	    static uint8_t	axis_x_data[2];
-	    axis_x_data[0] = OUT.X.bit.LO;
-	    axis_x_data[1] = OUT.X.bit.HI;
+			uint8_t	axis_x_data[6];
 
-	    MCP2515_CS_LOW();
-	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
-	    HAL_Delay(5);
-	    SPI_TxBuffer(axis_x_data, 2);
-	    HAL_Delay(5);
-	    MCP2515_CS_HIGH();
+			axis_x_data[0] = OUT.X.bit.LO;
+			axis_x_data[1] = OUT.X.bit.HI;
+			axis_x_data[2] = OUT.Y.bit.LO;
+			axis_x_data[3] = OUT.Y.bit.HI;
+			axis_x_data[4] = OUT.Z.bit.LO;
+			axis_x_data[5] = OUT.Z.bit.HI;
 
-	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
-	}
-    }
 
-    if(ctrl_status.TXB1REQ != 1){
+			MCP2515_CS_LOW();
+			SPI_Tx(MCP2515_LOAD_TXB0SIDH);
+		    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
+			SPI_Tx((uint8_t)TxBuff->DLC);
+			SPI_TxBuffer(axis_x_data, (uint8_t)TxBuff->DLC);
+			SPI_TxBuffer(axis_x_data, 2);
+			MCP2515_CS_HIGH();
 
-    	res = HAL_SPI_GetState(&hspi1);
-	if(res == HAL_SPI_STATE_READY){
-
-	    static uint8_t	axis_y_data[2];
-	    axis_y_data[0] = OUT.Y.bit.LO;
-	    axis_y_data[1] = OUT.Y.bit.HI;
-
-	    MCP2515_CS_LOW();
-	    SPI_Tx(MCP2515_LOAD_TXB1SIDH);
-	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
-	    HAL_Delay(5);
-	    SPI_TxBuffer(axis_y_data, 2);
-	    HAL_Delay(5);
-	    MCP2515_CS_HIGH();
-
-	    MCP2515_RequestToSend(MCP2515_RTS_TX1);
-	}
-    }
-
-    if(ctrl_status.TXB2REQ != 1){
-
-    	res = HAL_SPI_GetState(&hspi1);
-	if(res == HAL_SPI_STATE_READY){
-
-	    static uint8_t	axis_z_data[2];
-	    axis_z_data[0] = OUT.Z.bit.LO;
-	    axis_z_data[1] = OUT.Z.bit.HI;
-
-	    MCP2515_CS_LOW();
-	    SPI_Tx(MCP2515_LOAD_TXB2SIDH);
-	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 5);
-	    HAL_Delay(5);
-	    SPI_TxBuffer(axis_z_data, 2);
-	    HAL_Delay(5);
-	    MCP2515_CS_HIGH();
-
-	    MCP2515_RequestToSend(MCP2515_RTS_TX2);
-	}
+			MCP2515_RequestToSend(MCP2515_RTS_TX0);
+		}
     }
 }
 
+void check_errors(CAN_HandleTypeDef *hcan){
+	static uint8_t buss_err = 0x0,
+			TX_err_pass = 0x0,
+			RX_err_pass = 0x0;
+	HAL_CAN_StateTypeDef	res;
 
-void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff, CAN_TxHeaderTypeDef *TxBuff){
-	uint8_t			RX_mailbox[6];
+	CTRL.REG_ERRORS.error_flag_reg = MCP2515_ReadByte(MCP2515_EFLG);
+
+	buss_err = CANSPI_isBussOff();
+	TX_err_pass = CANSPI_isTxErrorPassive();
+	RX_err_pass = CANSPI_isRxErrorPassive();
+	res = HAL_CAN_GetState(hcan);
+
+	if(TX_err_pass){
+		CTRL.CNT_ERRORS.bit.TX_err = MCP2515_ReadByte(MCP2515_TEC);
+	}
+	if(RX_err_pass){
+		CTRL.CNT_ERRORS.bit.TX_err = MCP2515_ReadByte(MCP2515_REC);
+	}
+}
+
+/* check BUS off */
+uint8_t CANSPI_isBussOff(void){
+  uint8_t returnValue = 0;
+
+  CTRL.REG_ERRORS.error_flag_reg = MCP2515_ReadByte(MCP2515_EFLG);
+
+  if(CTRL.REG_ERRORS.TXBO == 1)
+  {
+    returnValue = 1;
+  }
+
+  return (returnValue);
+}
+
+/* check Tx Passive Error */
+uint8_t CANSPI_isTxErrorPassive(void)
+{
+  uint8_t returnValue = 0;
+
+  CTRL.REG_ERRORS.error_flag_reg = MCP2515_ReadByte(MCP2515_EFLG);
+
+  if(CTRL.REG_ERRORS.TXEP == 1)
+  {
+    returnValue = 1;
+  }
+
+  return (returnValue);
+}
+
+/* check Rx Passive Error */
+uint8_t CANSPI_isRxErrorPassive(void)
+{
+  uint8_t returnValue = 0;
+
+  CTRL.REG_ERRORS.error_flag_reg = MCP2515_ReadByte(MCP2515_EFLG);
+
+  if(CTRL.REG_ERRORS.RXEP == 1)
+  {
+    returnValue = 1;
+  }
+
+  return (returnValue);
+}
+
+void CAN_Recieve(CAN_HandleTypeDef *hcan, CAN_RxHeaderTypeDef *RxBuff, uint8_t *rx_ml){
 	char 			buffer[50];
-	OUT_DATA		RX_CAN_Data;
+
 	HAL_StatusTypeDef	result;
 
 
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, RxBuff, RX_mailbox);
+	check_errors(hcan);
 
-	    if(RxBuff->StdId == 120){
+		if(rs.RS_DataReady){
 
-		RX_CAN_Data.X.bit.LO = RX_mailbox[0] & 0x0f;
-		RX_CAN_Data.X.bit.HI = RX_mailbox[1] & 0x0f;
-		RX_CAN_Data.Y.bit.LO = RX_mailbox[2] & 0x0f;
-		RX_CAN_Data.Y.bit.HI = RX_mailbox[3] & 0x0f;
-		RX_CAN_Data.Z.bit.LO = RX_mailbox[4] & 0x0f;
-		RX_CAN_Data.Z.bit.HI = RX_mailbox[5] & 0x0f;
+			RX_CAN_Data.X.bit.LO = rx_ml[0];// & 0x0f;
+			RX_CAN_Data.X.bit.HI = rx_ml[1];// & 0x0f;
+			RX_CAN_Data.Y.bit.LO = rx_ml[2];// & 0x0f;
+			RX_CAN_Data.Y.bit.HI = rx_ml[3];// & 0x0f;
+			RX_CAN_Data.Z.bit.LO = rx_ml[4];// & 0x0f;
+			RX_CAN_Data.Z.bit.HI = rx_ml[5];// & 0x0f;
 
-		sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
-		HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);
+			sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
+			HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), 10);
 
-		result = HAL_UART_Transmit(&huart1, (uint8_t*) buffer, strlen(buffer), 10);
-		if(result == HAL_OK){
+			result = HAL_UART_Transmit(&huart1, (uint8_t*) buffer, strlen(buffer), 10);
+			if(result == HAL_OK){
 
-		    rs.RS_X_axis_data = 0;
-		    rs.RS_Y_axis_data = 0;
-		    rs.RS_Z_axis_data = 0;
+				rs.RS_X_axis_data = 0;
+				rs.RS_Y_axis_data = 0;
+				rs.RS_Z_axis_data = 0;
 
-		    rs.RS_DataSended = 1;
-		    rs.RS_DataReady = 0;
-		    //break;
+				rs.RS_DataSended = 1;
+				rs.RS_DataReady = 0;
+				//break;
+				}
 		}
-
-	    }
-	    else
-	    	rs.RS_DataSended = 0;
-//	}
+			else
+				rs.RS_DataSended = 0;
 }

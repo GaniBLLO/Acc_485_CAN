@@ -44,7 +44,6 @@ void ACC_init(I2C_HandleTypeDef *i2c){
     ACC_setting(ACC_ADDR, i2c);
 
     rs.RS_DataSended = 1;
-    //ACC_check_settings(ACC_ADDR, i2c);
 }
 
 void ACC_init_addr (uint8_t address, I2C_HandleTypeDef *i2c){
@@ -64,8 +63,6 @@ void ACC_init_addr (uint8_t address, I2C_HandleTypeDef *i2c){
     HAL_I2C_Master_Transmit(i2c, address, command_arr, sizeof(command_arr), 10);
     HAL_I2C_Master_Receive(i2c, address, receive_arr, sizeof(receive_arr), 10);
 
-    GPIOC->BSRR |= GPIO_BSRR_BS13;
-    HAL_Delay(1000);
     GPIOC->BSRR |= GPIO_BSRR_BR13;
     HAL_Delay(1000);
     GPIOC->BSRR |= GPIO_BSRR_BS13;
@@ -135,8 +132,8 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
 	rs.RS_Z_axis_data = 1;
     }
 
-    if(rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data){
-    	rs.RS_DataReady = 1;
-    }
+//    if(rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data){
+//    	rs.RS_DataReady = 1;
+//    }
 }
 

@@ -22,14 +22,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 //#include "stdbool.h"
+#include "RS_Functions.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 CAN_TxHeaderTypeDef Tx_SPI_Header;
-CAN_TxHeaderTypeDef Tx_CAN_Header;
-
-CAN_RxHeaderTypeDef RxHeader;
+CAN_RxHeaderTypeDef Rx_CAN_Header;
 
 /* USER CODE END PTD */
 
@@ -55,7 +54,6 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,52 +65,47 @@ static void MX_CRC_Init(void);
 static void MX_CAN_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-void ACC_init();
+
+void CANSPI_isTxErrorPassive();
 void update_ACC_data();
-void RS_Send();
 void set_SPI_Header();
 void set_CAN_Header();
-void SPI_Send();
+void en_peripheria();
 void MCP_settings();
 void CAN_Recieve();
+void SPI_Send();
+void ACC_init();
+void RS_Send();
 
-uint8_t RxData[8] = {0};
+uint8_t RxData[6] = {0};
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
+	extern RS_DATA_STRUCT	rs;
 
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK){
-    	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+
+    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &Rx_CAN_Header, RxData) == HAL_OK){
+    	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended)){
+    	    	rs.RS_DataReady = 1;
+    	    }
     }
-}
 
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
-{
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 }
 
 
 void set_SPI_Header(){
 
-    Tx_SPI_Header.StdId = 	0x103 << 5;
+    Tx_SPI_Header.StdId = 	0x37 << 5;
     Tx_SPI_Header.ExtId = 	0x0;
     Tx_SPI_Header.IDE = 	CAN_ID_STD;
     Tx_SPI_Header.RTR = 	CAN_RTR_DATA;
-    Tx_SPI_Header.DLC = 	2;
+    Tx_SPI_Header.DLC = 	6;
     Tx_SPI_Header.TransmitGlobalTime = DISABLE;
 }
 
-void set_CAN_Header(){
-
-    Tx_CAN_Header.StdId = 	0x61 << 5;
-    Tx_CAN_Header.ExtId = 	0x0;
-    Tx_CAN_Header.IDE = 	CAN_ID_STD;
-    Tx_CAN_Header.RTR = 	CAN_RTR_REMOTE;
-    Tx_CAN_Header.DLC = 	2;
-    Tx_CAN_Header.TransmitGlobalTime = DISABLE;
-}
 
 /* USER CODE END 0 */
 
@@ -153,6 +146,7 @@ int main(void)
 
   ACC_init(&hi2c1);
   MCP_settings();
+  en_peripheria(&hcan);
 
   /* USER CODE END 2 */
 
@@ -165,7 +159,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
     SPI_Send(&Tx_SPI_Header);
-    CAN_Recieve(&hcan , &RxHeader , &Tx_CAN_Header);
+	//HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &RxHeader, RxData);
+    CAN_Recieve(&hcan, &Rx_CAN_Header, RxData);
 //    RS_Send(&huart1);
   }
   /* USER CODE END 3 */
@@ -189,7 +184,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -204,7 +199,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -226,10 +221,10 @@ static void MX_CAN_Init(void)
 
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN1;
-  hcan.Init.Prescaler = 4;
-  hcan.Init.Mode = CAN_MODE_SILENT;
+  hcan.Init.Prescaler = 12;
+  hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
@@ -247,28 +242,16 @@ static void MX_CAN_Init(void)
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0103 << 5;
+  sFilterConfig.FilterIdHigh = 0x0000;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0103 << 5;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   //sFilterConfig.SlaveStartFilterBank = 10;
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){
       Error_Handler();
   }
 
-  if(HAL_CAN_Start(&hcan) != HAL_OK){
-      Error_Handler();
-   }
-  if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK){
-	  Error_Handler();
-  }
-
-  if(HAL_CAN_ActivateNotification(&hcan, CAN_IT_ERROR) != HAL_OK){
-	  Error_Handler();
-  }
-
   set_SPI_Header(&Tx_SPI_Header);
-  set_CAN_Header(&Tx_CAN_Header);
 
   /* USER CODE END CAN_Init 2 */
 

@@ -1,7 +1,7 @@
 ../Core/Src/ACC_init.c:27:6:update_ACC_data	40	static
 ../Core/Src/ACC_init.c:41:6:ACC_init	16	static
-../Core/Src/ACC_init.c:50:6:ACC_init_addr	32	static
-../Core/Src/ACC_init.c:74:6:ACC_setting	40	static
-../Core/Src/ACC_init.c:88:6:read_x_axis	40	static
-../Core/Src/ACC_init.c:106:6:read_y_axis	40	static
-../Core/Src/ACC_init.c:124:6:read_z_axis	40	static
+../Core/Src/ACC_init.c:49:6:ACC_init_addr	32	static
+../Core/Src/ACC_init.c:71:6:ACC_setting	40	static
+../Core/Src/ACC_init.c:85:6:read_x_axis	40	static
+../Core/Src/ACC_init.c:103:6:read_y_axis	40	static
+../Core/Src/ACC_init.c:121:6:read_z_axis	40	static

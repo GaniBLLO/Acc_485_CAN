@@ -12,8 +12,8 @@
 #include "string.h"
 #include "stdio.h"
 
-RS_DATA_STRUCT	rs;
-extern OUT_DATA	OUT;
+RS_DATA_STRUCT			rs;
+extern OUT_DATA			OUT;
 OUT_DATA				RX_CAN_Data;
 
 void RS_Send(UART_HandleTypeDef *uart){
@@ -71,9 +71,8 @@ void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t 
 
 				rs.RS_DataSended = 1;
 				rs.RS_DataReady = 0;
-				//break;
 				}
 		}
-			else
-				rs.RS_DataSended = 0;
+		else
+			rs.RS_DataSended = 0;
 }

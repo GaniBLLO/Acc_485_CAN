@@ -1709,14 +1709,13 @@ void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t 
  8000b72:	4b05      	ldr	r3, [pc, #20]	; (8000b88 <CAN_Recieve+0xd8>)
  8000b74:	2200      	movs	r2, #0
  8000b76:	601a      	str	r2, [r3, #0]
-				//break;
 				}
 		}
-			else
-				rs.RS_DataSended = 0;
+		else
+			rs.RS_DataSended = 0;
 }
  8000b78:	e002      	b.n	8000b80 <CAN_Recieve+0xd0>
-				rs.RS_DataSended = 0;
+			rs.RS_DataSended = 0;
  8000b7a:	4b03      	ldr	r3, [pc, #12]	; (8000b88 <CAN_Recieve+0xd8>)
  8000b7c:	2200      	movs	r2, #0
  8000b7e:	605a      	str	r2, [r3, #4]
@@ -1798,9 +1797,9 @@ void set_SPI_Header(){
  8000bf8:	b480      	push	{r7}
  8000bfa:	af00      	add	r7, sp, #0
 
-    Tx_SPI_Header.StdId = 	0x37 << 5;
+    Tx_SPI_Header.StdId = 	0xF<<5;//37 << 5;
  8000bfc:	4b0b      	ldr	r3, [pc, #44]	; (8000c2c <set_SPI_Header+0x34>)
- 8000bfe:	f44f 62dc 	mov.w	r2, #1760	; 0x6e0
+ 8000bfe:	f44f 72f0 	mov.w	r2, #480	; 0x1e0
  8000c02:	601a      	str	r2, [r3, #0]
     Tx_SPI_Header.ExtId = 	0x0;
  8000c04:	4b09      	ldr	r3, [pc, #36]	; (8000c2c <set_SPI_Header+0x34>)

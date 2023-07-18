@@ -2388,9 +2388,9 @@ static void MX_USART1_UART_Init(void)
  8000efc:	4b09      	ldr	r3, [pc, #36]	; (8000f24 <MX_USART1_UART_Init+0x4c>)
  8000efe:	2208      	movs	r2, #8
  8000f00:	615a      	str	r2, [r3, #20]
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_CTS;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
  8000f02:	4b08      	ldr	r3, [pc, #32]	; (8000f24 <MX_USART1_UART_Init+0x4c>)
- 8000f04:	f44f 7200 	mov.w	r2, #512	; 0x200
+ 8000f04:	f44f 7240 	mov.w	r2, #768	; 0x300
  8000f08:	619a      	str	r2, [r3, #24]
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
  8000f0a:	4b06      	ldr	r3, [pc, #24]	; (8000f24 <MX_USART1_UART_Init+0x4c>)
@@ -3099,13 +3099,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
  8001328:	f003 0304 	and.w	r3, r3, #4
  800132c:	60bb      	str	r3, [r7, #8]
  800132e:	68bb      	ldr	r3, [r7, #8]
-    /**USART1 GPIO Configuration
     PA9     ------> USART1_TX
     PA10     ------> USART1_RX
     PA11     ------> USART1_CTS
+    PA12     ------> USART1_RTS
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_9;
- 8001330:	f44f 7300 	mov.w	r3, #512	; 0x200
+    GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_12;
+ 8001330:	f44f 5390 	mov.w	r3, #4608	; 0x1200
  8001334:	613b      	str	r3, [r7, #16]
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
  8001336:	2302      	movs	r3, #2

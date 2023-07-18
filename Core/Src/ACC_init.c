@@ -132,6 +132,7 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
 	rs.RS_Z_axis_data = 1;
     }
 
+
 //    if(rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data){
 //    	rs.RS_DataReady = 1;
 //    }

@@ -96,7 +96,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 
 void set_SPI_Header(){
 
-    Tx_SPI_Header.StdId = 	0xF<<5;//37 << 5;
+    Tx_SPI_Header.StdId = 	0xF<<5;;
     Tx_SPI_Header.ExtId = 	0x0;
     Tx_SPI_Header.IDE = 	CAN_ID_STD;
     Tx_SPI_Header.RTR = 	CAN_RTR_DATA;

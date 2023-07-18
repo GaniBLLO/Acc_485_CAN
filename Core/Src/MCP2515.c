@@ -488,6 +488,7 @@ void check_errors(CAN_HandleTypeDef *hcan){
 			RX_err_pass = 0x0;
 	HAL_CAN_StateTypeDef	res;
 
+
 	CTRL.REG_ERRORS.error_flag_reg = MCP2515_ReadByte(MCP2515_EFLG);
 
 	buss_err = CANSPI_isBussOff();
@@ -501,6 +502,7 @@ void check_errors(CAN_HandleTypeDef *hcan){
 	if(RX_err_pass){
 		CTRL.CNT_ERRORS.bit.TX_err = MCP2515_ReadByte(MCP2515_REC);
 	}
+
 }
 
 /* check BUS off */

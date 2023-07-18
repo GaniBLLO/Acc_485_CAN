@@ -88,8 +88,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &Rx_CAN_Header, RxData) == HAL_OK){
-    	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended))
+    	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended)){
     	    	rs.RS_DataReady = 1;
+    	}
     }
 }
 
@@ -375,8 +376,8 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {

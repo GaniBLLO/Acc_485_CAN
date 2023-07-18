@@ -18,10 +18,10 @@
 ../Core/Src/MCP2515.c:268:16:SPI_Rx	16	static
 ../Core/Src/MCP2515.c:276:13:SPI_RxBuffer	16	static
 ../Core/Src/MCP2515.c:281:6:en_peripheria	16	static
-../Core/Src/MCP2515.c:297:6:setting_CNFx	40	static
-../Core/Src/MCP2515.c:384:6:MCP_settings	16	static
-../Core/Src/MCP2515.c:397:6:SPI_Send	24	static
-../Core/Src/MCP2515.c:484:6:check_errors	24	static
-../Core/Src/MCP2515.c:506:9:CANSPI_isBussOff	16	static
-../Core/Src/MCP2515.c:520:9:CANSPI_isTxErrorPassive	16	static
-../Core/Src/MCP2515.c:535:9:CANSPI_isRxErrorPassive	16	static
+../Core/Src/MCP2515.c:298:6:setting_CNFx	40	static
+../Core/Src/MCP2515.c:385:6:MCP_settings	16	static
+../Core/Src/MCP2515.c:398:6:SPI_Send	24	static
+../Core/Src/MCP2515.c:485:6:check_errors	24	static
+../Core/Src/MCP2515.c:507:9:CANSPI_isBussOff	16	static
+../Core/Src/MCP2515.c:521:9:CANSPI_isTxErrorPassive	16	static
+../Core/Src/MCP2515.c:536:9:CANSPI_isRxErrorPassive	16	static

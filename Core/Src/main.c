@@ -88,11 +88,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &Rx_CAN_Header, RxData) == HAL_OK){
-    	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended)){
+    	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended))
     	    	rs.RS_DataReady = 1;
-    	    }
     }
-
 }
 
 

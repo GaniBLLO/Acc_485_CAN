@@ -280,6 +280,7 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 
 void en_peripheria(CAN_HandleTypeDef *hcan){
 
+
 	if(HAL_CAN_Start(hcan) != HAL_OK){
 	  Error_Handler();
 	}
@@ -404,22 +405,22 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 		res = HAL_SPI_GetState(&hspi1);
 		if(res == HAL_SPI_STATE_READY){
 
-			uint8_t	axis_x_data[6];
+			uint8_t	axis_data[6];
 
-			axis_x_data[0] = OUT.X.bit.LO;
-			axis_x_data[1] = OUT.X.bit.HI;
-			axis_x_data[2] = OUT.Y.bit.LO;
-			axis_x_data[3] = OUT.Y.bit.HI;
-			axis_x_data[4] = OUT.Z.bit.LO;
-			axis_x_data[5] = OUT.Z.bit.HI;
+			axis_data[0] = OUT.X.bit.LO;
+			axis_data[1] = OUT.X.bit.HI;
+			axis_data[2] = OUT.Y.bit.LO;
+			axis_data[3] = OUT.Y.bit.HI;
+			axis_data[4] = OUT.Z.bit.LO;
+			axis_data[5] = OUT.Z.bit.HI;
 
 
 			MCP2515_CS_LOW();
 			SPI_Tx(MCP2515_LOAD_TXB0SIDH);
 		    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
 			SPI_Tx((uint8_t)TxBuff->DLC);
-			SPI_TxBuffer(axis_x_data, (uint8_t)TxBuff->DLC);
-			SPI_TxBuffer(axis_x_data, 2);
+			SPI_TxBuffer(axis_data, (uint8_t)TxBuff->DLC);
+			SPI_TxBuffer(axis_data, 2);
 			MCP2515_CS_HIGH();
 
 			MCP2515_RequestToSend(MCP2515_RTS_TX0);

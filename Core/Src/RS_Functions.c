@@ -16,6 +16,21 @@ RS_DATA_STRUCT			rs;
 extern OUT_DATA			OUT;
 OUT_DATA				RX_CAN_Data;
 
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+
+	rs.RS_DataSended = 1;
+	rs.RS_DataReady = 0;
+}
+
+void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart){
+
+	rs.RS_X_axis_data = 0;
+	rs.RS_Y_axis_data = 0;
+	rs.RS_Z_axis_data = 0;
+}
+
+
 void RS_Send(UART_HandleTypeDef *uart){
 
     char		buffer[50]; //44
@@ -48,7 +63,7 @@ void RS_Send(UART_HandleTypeDef *uart){
 void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t *rx_ml){
 	char 			buffer[50];
 
-	HAL_StatusTypeDef	result;
+	//HAL_StatusTypeDef	result;
 
 		if(rs.RS_DataReady){
 
@@ -60,18 +75,17 @@ void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t 
 			RX_CAN_Data.Z.bit.HI = rx_ml[5];// & 0x0f;
 
 			sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
-			HAL_UART_Transmit(uart, (uint8_t*)buffer, strlen(buffer), 10);
+			HAL_UART_Transmit_DMA(uart, (uint8_t*)buffer, strlen(buffer));
 
-			result = HAL_UART_Transmit(uart, (uint8_t*) buffer, strlen(buffer), 10);
-			if(result == HAL_OK){
-
-				rs.RS_X_axis_data = 0;
-				rs.RS_Y_axis_data = 0;
-				rs.RS_Z_axis_data = 0;
-
-				rs.RS_DataSended = 1;
-				rs.RS_DataReady = 0;
-				}
+			//result = HAL_UART_Transmit(uart, (uint8_t*) buffer, strlen(buffer), 10);
+//			if(result == HAL_OK){
+//				rs.RS_X_axis_data = 0;
+//				rs.RS_Y_axis_data = 0;
+//				rs.RS_Z_axis_data = 0;
+//
+//				rs.RS_DataSended = 1;
+//				rs.RS_DataReady = 0;
+//				}
 		}
 		else
 			rs.RS_DataSended = 0;

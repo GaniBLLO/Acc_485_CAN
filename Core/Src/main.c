@@ -98,7 +98,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 
 void set_SPI_Header(){
 
-    Tx_SPI_Header.StdId = 	0x5<<5;
+    Tx_SPI_Header.StdId = 	0xF<<5;
     Tx_SPI_Header.ExtId = 	0x0;
     Tx_SPI_Header.IDE = 	CAN_ID_STD;
     Tx_SPI_Header.RTR = 	CAN_RTR_DATA;
@@ -244,7 +244,7 @@ static void MX_CAN_Init(void)
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdHigh = 0x4<<5;
   sFilterConfig.FilterIdLow = 0x0000;
   sFilterConfig.FilterMaskIdHigh = 0x0;
   sFilterConfig.FilterMaskIdLow = 0x0000;

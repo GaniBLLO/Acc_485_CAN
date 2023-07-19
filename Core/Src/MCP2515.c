@@ -416,12 +416,17 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 	    axis_data[5] = OUT.Z.bit.HI;
 
 	    MCP2515_CS_LOW();
-	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
-	    SPI_Tx((uint8_t)TxBuff->DLC);
-	    SPI_TxBuffer(axis_data, (uint8_t)TxBuff->DLC);
+	    //SPI_Tx(MCP2515_LOAD_TXB0SIDH);
+	    MCP2515_WriteByte(0x31, 0x0);	//StId 8bti
+	    MCP2515_WriteByte(0x32, 0xA0);	//stdId 3bit + enEx + ExId 2bit
+	    MCP2515_WriteByte(0x33, 0x0);	//ExId 0x0H
+	    MCP2515_WriteByte(0x34, 0x0);	//exId 0x0L
+	    MCP2515_WriteByte(0x35, 0x6);	//RTR = 0 + 6 DLC
+	    MCP2515_WriteByteSequence(0x36, 0x3D, axis_data);	//DATA buffer
+	    //MCP2515_WriteByte(0x34, 0x0);
+	    //SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
+	    //SPI_TxBuffer(axis_data, 6);
 	    MCP2515_CS_HIGH();
-
 	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
 	}
     }
@@ -479,7 +484,7 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 //			MCP2515_RequestToSend(MCP2515_RTS_TX2);
 //		}
 //    }
-//    buffer_settings();
+    buffer_settings();
 }
 
 void check_errors(CAN_HandleTypeDef *hcan){

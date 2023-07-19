@@ -295,16 +295,16 @@ typedef union{
 
 typedef	struct{
     uint32_t	all;
-    uint16_t	all_ST;
     struct{
 	uint8_t	SIDL;
 	uint8_t	SIDH;
     }bit_ST;
-    uint16_t	all_EX;
+    uint16_t	all_ST;
     struct{
 	uint8_t	EIDL;
 	uint8_t	EIDH;
     }bit_EX;
+    uint16_t	all_EX;
     uint8_t	TX_SET;
     uint8_t	data[3];
 }SID;

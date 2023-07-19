@@ -8,7 +8,7 @@
 #include <RS_Functions.h>
 #include "ACC_init.h"
 
-#define ACC_ADDR			0x18 << 1
+#define ACC_ADDR		0x18 << 1
 #define COMMAND_CTRL_REG1	0x20
 #define COMMAND_CTRL_REG2	0x21
 #define COMMAND_CTRL_REG4	0x23

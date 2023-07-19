@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "RS_Functions.h"
+#include "MCP2515.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -83,13 +84,13 @@ uint8_t RxData[6] = {0};
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
-	extern RS_DATA_STRUCT	rs;
-
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    extern RS_DATA_STRUCT	rs;
 
     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &Rx_CAN_Header, RxData) == HAL_OK){
     	if((rs.RS_Z_axis_data && rs.RS_X_axis_data && rs.RS_Y_axis_data) && !(rs.RS_DataSended)){
-    	    	rs.RS_DataReady = 1;
+	    rs.RS_DataReady = 1;
+    	    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    	    MCP2515_WriteByte(MCP2515_CANINTF, 0x0);
     	}
     }
 }
@@ -97,7 +98,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback (CAN_HandleTypeDef * hcan){
 
 void set_SPI_Header(){
 
-    Tx_SPI_Header.StdId = 	0xF<<5;;
+    Tx_SPI_Header.StdId = 	0x5<<5;
     Tx_SPI_Header.ExtId = 	0x0;
     Tx_SPI_Header.IDE = 	CAN_ID_STD;
     Tx_SPI_Header.RTR = 	CAN_RTR_DATA;
@@ -159,10 +160,9 @@ int main(void)
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
     SPI_Send(&Tx_SPI_Header);
-
     CAN_Recieve(&huart1, &Rx_CAN_Header, RxData);
-
     check_errors(&hcan);
+
 //    RS_Send(&huart1);
   }
   /* USER CODE END 3 */
@@ -246,7 +246,7 @@ static void MX_CAN_Init(void)
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
   sFilterConfig.FilterIdHigh = 0x0000;
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   //sFilterConfig.SlaveStartFilterBank = 10;
   if(HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK){

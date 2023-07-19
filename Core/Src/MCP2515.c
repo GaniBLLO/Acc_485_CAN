@@ -17,9 +17,7 @@
 extern 	SPI_HandleTypeDef       hspi1;
 extern 	UART_HandleTypeDef 		huart1;
 #define SPI_CAN                 &hspi1
-#define SPI_TIMEOUT             100
-
-
+#define SPI_TIMEOUT             10
 
 
 #define MCP2515_CS_HIGH()   HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
@@ -280,7 +278,6 @@ static void SPI_RxBuffer(uint8_t *buffer, uint8_t length)
 
 void en_peripheria(CAN_HandleTypeDef *hcan){
 
-
 	if(HAL_CAN_Start(hcan) != HAL_OK){
 	  Error_Handler();
 	}
@@ -295,6 +292,10 @@ void en_peripheria(CAN_HandleTypeDef *hcan){
 	/*Setting normal mode*/
 	  while(MCP2515_SetNormalMode() != true);
 }
+
+
+
+
 void setting_CNFx(){
 
 /*https://github.com/eziya/STM32_SPI_MCP2515/blob/master/Src/CANSPI.c#L202*/
@@ -402,29 +403,27 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 
     if(ctrl_status.TXB0REQ != 1){
 
-		res = HAL_SPI_GetState(&hspi1);
-		if(res == HAL_SPI_STATE_READY){
+	res = HAL_SPI_GetState(&hspi1);
+	if(res == HAL_SPI_STATE_READY){
 
-			uint8_t	axis_data[6];
+	    uint8_t	axis_data[6];
 
-			axis_data[0] = OUT.X.bit.LO;
-			axis_data[1] = OUT.X.bit.HI;
-			axis_data[2] = OUT.Y.bit.LO;
-			axis_data[3] = OUT.Y.bit.HI;
-			axis_data[4] = OUT.Z.bit.LO;
-			axis_data[5] = OUT.Z.bit.HI;
+	    axis_data[0] = OUT.X.bit.LO;
+	    axis_data[1] = OUT.X.bit.HI;
+	    axis_data[2] = OUT.Y.bit.LO;
+	    axis_data[3] = OUT.Y.bit.HI;
+	    axis_data[4] = OUT.Z.bit.LO;
+	    axis_data[5] = OUT.Z.bit.HI;
 
+	    MCP2515_CS_LOW();
+	    SPI_Tx(MCP2515_LOAD_TXB0SIDH);
+	    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
+	    SPI_Tx((uint8_t)TxBuff->DLC);
+	    SPI_TxBuffer(axis_data, (uint8_t)TxBuff->DLC);
+	    MCP2515_CS_HIGH();
 
-			MCP2515_CS_LOW();
-			SPI_Tx(MCP2515_LOAD_TXB0SIDH);
-		    SPI_TxBuffer( (uint8_t*)(TxBuff->StdId), 4);
-			SPI_Tx((uint8_t)TxBuff->DLC);
-			SPI_TxBuffer(axis_data, (uint8_t)TxBuff->DLC);
-			SPI_TxBuffer(axis_data, 2);
-			MCP2515_CS_HIGH();
-
-			MCP2515_RequestToSend(MCP2515_RTS_TX0);
-		}
+	    MCP2515_RequestToSend(MCP2515_RTS_TX0);
+	}
     }
 //
 //    if(ctrl_status.TXB1REQ != 1){
@@ -480,6 +479,7 @@ void SPI_Send(CAN_TxHeaderTypeDef *TxBuff){
 //			MCP2515_RequestToSend(MCP2515_RTS_TX2);
 //		}
 //    }
+//    buffer_settings();
 }
 
 void check_errors(CAN_HandleTypeDef *hcan){
@@ -549,3 +549,27 @@ uint8_t CANSPI_isRxErrorPassive(void)
   return (returnValue);
 }
 
+
+void buffer_settings(void){
+    TXB_BUFFER	buff0, buff1, buff2;
+
+    buff0.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x31);
+    buff0.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x32);
+    buff0.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x33);
+    buff0.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x34);
+    buff0.SIDX.TX_SET = MCP2515_ReadByte(0x35);
+
+    buff1.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x41);
+    buff1.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x42);
+    buff1.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x43);
+    buff1.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x44);
+    buff1.SIDX.TX_SET = MCP2515_ReadByte(0x45);
+
+    buff2.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x51);
+    buff2.SIDX.bit_ST.SIDH = MCP2515_ReadByte(0x52);
+    buff2.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x53);
+    buff2.SIDX.bit_EX.EIDH = MCP2515_ReadByte(0x54);
+    buff2.SIDX.TX_SET = MCP2515_ReadByte(0x55);
+
+
+}

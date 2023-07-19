@@ -292,6 +292,35 @@ typedef union{
     }bit;
 }TXB_CTRL;
 
+
+typedef	struct{
+    uint32_t	all;
+    uint16_t	all_ST;
+    struct{
+	uint8_t	SIDL;
+	uint8_t	SIDH;
+    }bit_ST;
+    uint16_t	all_EX;
+    struct{
+	uint8_t	EIDL;
+	uint8_t	EIDH;
+    }bit_EX;
+    uint8_t	TX_SET;
+    uint8_t	data[3];
+}SID;
+
+
+typedef	struct{
+    SID	SIDX;
+}TXB_BUFFER;
+
+
+
+
+
+
+
+
 typedef union{
 	uint8_t	all;
 	struct{
@@ -353,5 +382,6 @@ uint8_t CANSPI_isBussOff(void);
 uint8_t CANSPI_isRxErrorPassive(void);
 uint8_t CANSPI_isTxErrorPassive(void);
 void en_peripheria(CAN_HandleTypeDef *hcan);
+void buffer_settings(void);
 #endif /* INC_MCP2515_H_ */
 

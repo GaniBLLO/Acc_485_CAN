@@ -4,8 +4,6 @@
  *  Created on: 30 июн. 2023 г.
  *      Author: Sokolov EvgenII
  */
-
-
 #include <RS_Functions.h>
 #include "ACC_init.h"
 #include "main.h"
@@ -15,6 +13,7 @@
 RS_DATA_STRUCT			rs;
 extern OUT_DATA			OUT;
 OUT_DATA			RX_CAN_Data;
+
 // RS485_DE Data Enable, Active High
 // RS485_RE Receive En, Active Low
 #define ENABLE_TRANSMIT() do { \
@@ -75,10 +74,8 @@ void RS_Send(UART_HandleTypeDef *uart){
 
 void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t *rx_ml){
 	char 			buffer[50];
-	uint8_t			nnn[1];
-	HAL_UART_StateTypeDef	status;
-
-	ENABLE_TRANSMIT();
+	HAL_StatusTypeDef	result;
+//	ENABLE_TRANSMIT();
 	if(rs.RS_DataReady){
 
 	    RX_CAN_Data.X.bit.LO = rx_ml[0];// & 0x0f;
@@ -89,23 +86,22 @@ void CAN_Recieve(UART_HandleTypeDef *uart, CAN_RxHeaderTypeDef *RxBuff, uint8_t 
 	    RX_CAN_Data.Z.bit.HI = rx_ml[5];// & 0x0f;
 
 	    sprintf(buffer, "X_axis: %d\tY_axis: %d\tZ_axis: %d\r\n", (int16_t)RX_CAN_Data.X.all, (int16_t)RX_CAN_Data.Y.all, (int16_t)RX_CAN_Data.Z.all);
-	    HAL_UART_Transmit_IT(uart, (uint8_t*)buffer, strlen(buffer));
-		ENABLE_RECEIVE();
+//	    HAL_UART_Transmit(uart, (uint8_t*)buffer, strlen(buffer),10);
+//		ENABLE_RECEIVE();
 //			if((__HAL_UART_GET_FLAG(uart, UART_FLAG_RXNE) ? SET : RESET) == RESET){
 //			    HAL_UART_Receive_IT(uart, smt, 1);
 //			}
-	    //result = HAL_UART_Transmit(uart, (uint8_t*) buffer, strlen(buffer), 10);
-//			if(result == HAL_OK){
-//				rs.RS_X_axis_data = 0;
-//				rs.RS_Y_axis_data = 0;
-//				rs.RS_Z_axis_data = 0;
-//
-//				rs.RS_DataSended = 1;
-//				rs.RS_DataReady = 0;
-//				}
+	    result = HAL_UART_Transmit(uart, (uint8_t*) buffer, strlen(buffer), 4);
+	    if(result == HAL_OK){
+
+		rs.RS_X_axis_data = 0;
+		rs.RS_Y_axis_data = 0;
+		rs.RS_Z_axis_data = 0;
+
+		rs.RS_DataSended = 1;
+		rs.RS_DataReady = 0;
+	    }
 	}
 	else
 	    rs.RS_DataSended = 0;
-
-    status = HAL_UART_GetState(uart);
 }

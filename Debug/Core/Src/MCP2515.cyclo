@@ -22,6 +22,6 @@ MCP2515.c:298:6:setting_CNFx	1
 MCP2515.c:385:6:MCP_settings	2
 MCP2515.c:398:6:SPI_Send	3
 MCP2515.c:485:6:check_errors	3
-MCP2515.c:507:9:CANSPI_isBussOff	2
-MCP2515.c:521:9:CANSPI_isTxErrorPassive	2
-MCP2515.c:536:9:CANSPI_isRxErrorPassive	2
+MCP2515.c:509:9:CANSPI_isBussOff	2
+MCP2515.c:523:9:CANSPI_isTxErrorPassive	2
+MCP2515.c:538:9:CANSPI_isRxErrorPassive	2

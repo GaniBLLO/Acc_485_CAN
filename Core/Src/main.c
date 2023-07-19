@@ -159,6 +159,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     update_ACC_data(&hi2c1);
     SPI_Send(&Tx_SPI_Header);
+
     CAN_Recieve(&huart1, &Rx_CAN_Header, RxData);
 
     check_errors(&hcan);

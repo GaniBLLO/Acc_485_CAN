@@ -22,6 +22,6 @@
 ../Core/Src/MCP2515.c:385:6:MCP_settings	16	static
 ../Core/Src/MCP2515.c:398:6:SPI_Send	24	static
 ../Core/Src/MCP2515.c:485:6:check_errors	24	static
-../Core/Src/MCP2515.c:507:9:CANSPI_isBussOff	16	static
-../Core/Src/MCP2515.c:521:9:CANSPI_isTxErrorPassive	16	static
-../Core/Src/MCP2515.c:536:9:CANSPI_isRxErrorPassive	16	static
+../Core/Src/MCP2515.c:509:9:CANSPI_isBussOff	16	static
+../Core/Src/MCP2515.c:523:9:CANSPI_isTxErrorPassive	16	static
+../Core/Src/MCP2515.c:538:9:CANSPI_isRxErrorPassive	16	static

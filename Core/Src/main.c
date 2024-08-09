@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdbool.h"
+#include "ACC_init.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,9 +65,9 @@ static void MX_USART1_UART_Init(void);
 static void MX_CRC_Init(void);
 static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
-void ACC_init();
-void GPIO_init();
-void update_ACC_data();
+//void ACC_init();
+//void GPIO_init();
+//void update_ACC_data();
 void RS_Send();
 
 bool MCP2515_Initialize();
@@ -124,7 +125,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   GPIO_init();
-  ACC_init(&hi2c1);
+
+  ACC_set.ACC_init(&hi2c1);
+
+//  ACC_init(&hi2c1);
 
   if(MCP2515_Initialize() == true){
       MCP2515_SetConfigMode();
@@ -140,7 +144,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  update_ACC_data(&hi2c1);
+	  ACC_set.update_ACC_data(&hi2c1);
 	  RS_Send(&huart1);
   }
   /* USER CODE END 3 */

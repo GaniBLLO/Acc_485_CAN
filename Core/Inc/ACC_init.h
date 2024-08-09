@@ -66,17 +66,28 @@ typedef union{
 	}bit;
 }STATUS_REG;
 
-typedef struct{
+typedef struct ACC_SETTING{
 
 	CONTROL_REG_POWER	CTRL_REG1;
 	CONTROL_REG_FILTERS	CTRL_REG2;
 	CONTROL_REG_UPDATE	CTRL_REG4;
 	STATUS_REG			STATUS_REG;
 
+	void (*ACC_init)(I2C_HandleTypeDef *i2c);
+	void (*update_ACC_data)(I2C_HandleTypeDef *i2c);
+
 }ACC_SETTING;
 
-#define ACC_SETTING_DEFAULT		{{0x27}, {0x0}, {0x80}, {0x0}}// 1 - 0x3f/37, 3 - 0x30/90
+extern ACC_SETTING	ACC_set;
 
+
+#define ACC_SETTING_DEFAULT	{{0x27},\
+							{0x0},\
+							{0x80},\
+							{0x0},\
+							ACC_init,\
+							update_ACC_data\
+}// 1 - 0x3f/37, 3 - 0x30/90
 
 
 
@@ -87,46 +98,38 @@ typedef union{
 		uint8_t LO	:8;
 		uint8_t HI	:8;
 	}bit;
-}X_AXIS;
 
-typedef union{
-
-	uint16_t all;
-	struct{
-		uint8_t LO	:8;
-		uint8_t HI	:8;
-	}bit;
-}Y_AXIS;
-
-typedef union{
-
-	uint16_t all;
-	struct{
-		uint8_t LO	:8;
-		uint8_t HI	:8;
-	}bit;
-}Z_AXIS;
+}AXIS;
 
 typedef struct{
 
-    X_AXIS X;
-    Y_AXIS Y;
-    Z_AXIS Z;
+    AXIS X;
+    AXIS Y;
+    AXIS Z;
+
+    void (*write_axis)(AXIS *axis, uint16_t arr);
 
 }OUT_DATA;
 
+extern OUT_DATA	OUT;
 
+#define OUT_DATA_XYZ_DEFAULT {{0},\
+							 {0},\
+							 {0},\
+							 write_axis\
+}
 
-#define OUT_DATA_XYZ_DEFAULT		{{0}, {0}, {0}}
 
 void ACC_init(I2C_HandleTypeDef *i2c);
+void update_ACC_data(I2C_HandleTypeDef *i2c);
+
 void ACC_init_addr (uint8_t address, I2C_HandleTypeDef *i2c);
 void ACC_setting(uint8_t address, I2C_HandleTypeDef *i2c);
-void update_ACC_data(I2C_HandleTypeDef *i2c);
+
 void read_x_axis(I2C_HandleTypeDef *i2c);
 void read_y_axis(I2C_HandleTypeDef *i2c);
 void read_z_axis(I2C_HandleTypeDef *i2c);
-
+void write_axis(AXIS *axis, uint16_t arr);
 
 
 #endif /* INC_ACC_INIT_H_ */

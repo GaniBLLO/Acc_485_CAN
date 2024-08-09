@@ -22,7 +22,6 @@
 
 ACC_SETTING	ACC_set = ACC_SETTING_DEFAULT;
 OUT_DATA	OUT 	= OUT_DATA_XYZ_DEFAULT;
-extern RS_DATA_STRUCT	rs;
 
 void update_ACC_data(I2C_HandleTypeDef *i2c){
 
@@ -46,6 +45,8 @@ void ACC_init(I2C_HandleTypeDef *i2c){
     rs.RS_DataSended = 1;
     //ACC_check_settings(ACC_ADDR, i2c);
 }
+
+
 
 void ACC_init_addr (uint8_t address, I2C_HandleTypeDef *i2c){
     HAL_StatusTypeDef result;
@@ -85,17 +86,22 @@ void ACC_setting(uint8_t address, I2C_HandleTypeDef *i2c){
 }
 
 
+void write_axis(AXIS *axis, uint16_t arr){
+	axis->all = arr;
+}
+
 void read_x_axis(I2C_HandleTypeDef *i2c){
 
     uint8_t data_LO_RX[1], data_HI_RX[1];
 
     if(ACC_set.STATUS_REG.bit.XOR || ACC_set.STATUS_REG.bit.XDA){
 
+    	//Считываю значения и записываю их в массивы
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_HI, 1, &data_HI_RX[0], 1, 10);		//Считали данные с регистра и записали в структуру
-		OUT.X.bit.HI = data_HI_RX[0] & 0xff;
-
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_X_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.X.bit.LO = data_LO_RX[0] & 0xff;
+
+		//Запись данных в структуру
+		OUT.write_axis(&OUT.X, ((data_HI_RX[0] & 0xff) << 8) | data_LO_RX[0]);
 
 		rs.RS_X_axis_data = 1;															//Данные готовы к отправке
 	}
@@ -108,11 +114,12 @@ void read_y_axis(I2C_HandleTypeDef *i2c){
 
     if(ACC_set.STATUS_REG.bit.YOR || ACC_set.STATUS_REG.bit.YDA){
 
+    	//Считываю значения и записываю их в массивы
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_HI, 1, &data_HI_RX[0], 1, 10);
-		OUT.Y.bit.HI = data_HI_RX[0] & 0xff;
-
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Y_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.Y.bit.LO = data_LO_RX[0] & 0xff;
+
+		//Запись данных в структуру
+		OUT.write_axis(&OUT.Y, ((data_HI_RX[0] & 0xff) << 8) | data_LO_RX[0]);
 
 	    rs.RS_Y_axis_data = 1;
     }
@@ -125,11 +132,12 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
     uint8_t data_LO_RX[1], data_HI_RX[1];
     if(ACC_set.STATUS_REG.bit.ZOR || ACC_set.STATUS_REG.bit.ZDA){
 
+    	//Считываю значения и записываю их в массивы
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_HI, 1, &data_HI_RX[0], 1, 10);
-		OUT.Z.bit.HI = data_HI_RX[0] & 0xff;
-
 		HAL_I2C_Mem_Read(i2c, ACC_ADDR, COMMAND_Z_LO, 1, &data_LO_RX[0], 1, 10);
-		OUT.Z.bit.LO = data_LO_RX[0] & 0xff;
+
+		//Запись данных в структуру
+		OUT.write_axis(&OUT.Z, ((data_HI_RX[0] & 0xff) << 8) | data_LO_RX[0]);
 
 		rs.RS_Z_axis_data = 1;
     }
@@ -138,4 +146,6 @@ void read_z_axis(I2C_HandleTypeDef *i2c){
     	rs.RS_DataReady = 1;
 
 }
+
+
 

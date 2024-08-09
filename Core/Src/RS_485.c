@@ -12,7 +12,6 @@
 #include "stdio.h"
 
 RS_DATA_STRUCT	rs;
-extern OUT_DATA	OUT;
 
 void RS_Send(UART_HandleTypeDef *uart){
 

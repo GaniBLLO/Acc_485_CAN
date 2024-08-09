@@ -18,10 +18,11 @@ typedef struct{
     int RS_X_axis_data;
     int RS_Y_axis_data;
     int RS_Z_axis_data;
+
 }RS_DATA_STRUCT;
 
+extern RS_DATA_STRUCT	rs;
 
 void RS_Send(UART_HandleTypeDef *uart);
-void RS_Receive(UART_HandleTypeDef *uart);
 
 #endif /* INC_RS_485_H_ */
